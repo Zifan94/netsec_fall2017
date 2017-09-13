@@ -121,36 +121,27 @@ def basicUnitTestForProtocol():
 
 	server = VerificationCodeServerProtocol(loop)
 	client = VerificationCodeClientProtocol(1, loop)
-	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
-
-	# test for general connection_made 
-	client.connection_made(cTransport)
-	server.connection_made(sTransport)
+	
+	transportToServer = MockTransportToProtocol(server)
+	transportToClient = MockTransportToProtocol(client)
+	
+	server.connection_made(transportToClient)
+	client.connection_made(transportToServer)
 	print("- test for general connection_made SUCCESS")
 	print ("")
 	
-	# test for client verification code length 
+	
 	MockRequestPacket = RequestPacket()
 	MockRequestPacket.ID = 1
 	packetBytes = MockRequestPacket.__serialize__()
+	# server.state = "wait_for_request_packet"
+	# client.state = "wait_for_verification_code_packet"
+	
 	server.data_received(packetBytes)
 	assert len(str(server._verificationCode)) == 6
 	print("- test for client verification code length SUCCESS")
 	print ("")
 
-	# negative test for messing up packet order 
-	MockVerifyPacket = VerifyPacket()
-	MockVerifyPacket.ID = 1
-	MockVerifyPacket.answer = server._verificationCode
-	packetBytes = MockVerifyPacket.__serialize__()
-	server.state = "wait_for_verify_packet"
-	client.state = "initial_state"
-	server.data_received(packetBytes)
-	assert client.state == "error_state"
-	print("- negative test for messing up packet order SUCCESS")
-	print ("")
-
-	# test for client vericifation result 
 	MockVerifyPacket = VerifyPacket()
 	MockVerifyPacket.ID = 1
 	MockVerifyPacket.answer = server._verificationCode
@@ -162,7 +153,6 @@ def basicUnitTestForProtocol():
 	print("- test for client vericifation result SUCCESS")
 	print ("")
 
-	# negative test for client vericifation result
 	MockVerifyPacket = VerifyPacket()
 	MockVerifyPacket.ID = 1
 	MockVerifyPacket.answer = 0

@@ -39,16 +39,15 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 						print("Server Side: Error: State Error! Expecting wait_for_request_packet but getting %s"%self.state)
 					self.state = "error_state"
 					self.loop.stop()
-				else:
-					outBoundPacket = VerificationCodePacket()
-					outBoundPacket.ID = packet.ID
-					self._verificationCode = random.randint(100000, 999999)
-					outBoundPacket.originalVerificationCode = self._verificationCode
-					if __name__ =="__main__":
-						print("Server Side: Sending Verification Code is: %d..."%outBoundPacket.originalVerificationCode)
-					packetBytes = outBoundPacket.__serialize__()
-					self.state = "wait_for_verify_packet"
-					self.transport.write(packetBytes)
+				outBoundPacket = VerificationCodePacket()
+				outBoundPacket.ID = packet.ID
+				self._verificationCode = random.randint(100000, 999999)
+				outBoundPacket.originalVerificationCode = self._verificationCode
+				if __name__ =="__main__":
+					print("Server Side: Sending Verification Code is: %d..."%outBoundPacket.originalVerificationCode)
+				packetBytes = outBoundPacket.__serialize__()
+				self.state = "wait_for_verify_packet"
+				self.transport.write(packetBytes)
 			elif isinstance(packet, VerifyPacket):
 				#print("Server: %s"%self.state)
 				if self.state != "wait_for_verify_packet":
