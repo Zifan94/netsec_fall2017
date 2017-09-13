@@ -32,13 +32,18 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 	def data_received(self, data):
 		self._deserializer.update(data)
 		for packet in self._deserializer.nextPackets():
+			if self.transport == None:
+				self.loop.stop()
+				break
+			if self.state == "error_state":
+				self.transport.close()
 			if isinstance(packet, RequestPacket):
 				#print("Server: %s"%self.state)
 				if self.state != "wait_for_request_packet":
 					if __name__ =="__main__":
 						print("Server Side: Error: State Error! Expecting wait_for_request_packet but getting %s"%self.state)
 					self.state = "error_state"
-					self.loop.stop()
+					#self.loop.stop()
 				else:
 					outBoundPacket = VerificationCodePacket()
 					outBoundPacket.ID = packet.ID
@@ -55,29 +60,32 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 					if __name__ =="__main__":
 						print("Server Side: Error: State Error! Expecting wait_for_verify_packet but getting %s"%self.state)
 					self.state = "error_state"
-					self.loop.stop()
-				outBoundPacket = ResultPacket()
-				outBoundPacket.ID = packet.ID
-				if packet.answer == self._verificationCode:	
-					outBoundPacket.passfail = "pass"
-					self._result = "pass"
-				else:	
-					outBoundPacket.passfail = "fail"
-					self._result = "fail"
-				packetBytes = outBoundPacket.__serialize__()
-				self.state = "finish_state"
-				self.transport.write(packetBytes)
-				if __name__ =="__main__":
-					print("Server Side: Verification Result is: %s..."%outBoundPacket.passfail)
+					#self.loop.stop()
+				else:
+					outBoundPacket = ResultPacket()
+					outBoundPacket.ID = packet.ID
+					if packet.answer == self._verificationCode:	
+						outBoundPacket.passfail = "pass"
+						self._result = "pass"
+					else:	
+						outBoundPacket.passfail = "fail"
+						self._result = "fail"
+					packetBytes = outBoundPacket.__serialize__()
+					self.state = "finish_state"
+					self.transport.write(packetBytes)
+					if __name__ =="__main__":
+						print("Server Side: Verification Result is: %s..."%outBoundPacket.passfail)
 			else:
 				#print("Server: %s"%self.state)
 				if __name__ =="__main__":
 					print("Client Side: Error: Unexpected data received!")
+				self.state = "error_state"
+			if self.transport == None:
 				self.loop.stop()
-				self.state = "finish_state"
-			if self.state == "finish_state" or self.state == "error_state":
-				self.loop.stop()
-				#self.transport.close()
+			if self.state == "error_state":
+				self.transport.close()
+
+		
 			
 
 if __name__ =="__main__":

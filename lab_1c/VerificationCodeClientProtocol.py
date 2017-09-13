@@ -47,13 +47,17 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 	def data_received(self, data):
 		self._deserializer.update(data)
 		for packet in self._deserializer.nextPackets():
+			if self.transport == None:
+				self.loop.stop()
+			if self.state == "finish_state" or self.state == "error_state":
+				self.transport.close()
 			if isinstance(packet, VerificationCodePacket):
 				#print("Client: %s"%self.state)
 				if self.state != "wait_for_verification_code_packet":
 					if __name__ =="__main__":
 						print("Client Side: Error: State Error! Expecting wait_for_verification_code_packet but getting %s"%self.state)
 					self.state = "error_state"
-					self.loop.stop()
+					#self.loop.stop()
 				else:
 					outBoundPacket = VerifyPacket()
 					outBoundPacket.ID = packet.ID
@@ -74,7 +78,7 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 					if __name__ =="__main__":
 						print("Client Side: Error: State Error! Expecting wait_for_result_packet but getting %s"%self.state)
 					self.state = "error_state"
-					self.loop.stop()
+					#self.loop.stop()
 				else:
 					if __name__ =="__main__":
 						print("Client Side: Verification %s..."%packet.passfail)
@@ -83,11 +87,15 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 				#print("Client: %s"%self.state)
 				if __name__ =="__main__":
 					print("Client Side: Error: Unexpected data received!")
+				self.state = "error_state"
+			if self.transport == None:
 				self.loop.stop()
-				self.state = "finish_state"
 			if self.state == "finish_state" or self.state == "error_state":
-				self.loop.stop()
-				#self.transport.close()
+				self.transport.close()
+
+
+
+	
 
 	def callbackForUserVCInput(self):
 		answer = input("Client Side: Please input the verification code: ")

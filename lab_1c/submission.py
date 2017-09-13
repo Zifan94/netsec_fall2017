@@ -130,6 +130,10 @@ def basicUnitTestForProtocol():
 	print ("")
 	
 	# test for client verification code length 
+	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
+	client.connection_made(cTransport)
+	server.connection_made(sTransport)
+
 	MockRequestPacket = RequestPacket()
 	MockRequestPacket.ID = 1
 	packetBytes = MockRequestPacket.__serialize__()
@@ -139,6 +143,10 @@ def basicUnitTestForProtocol():
 	print ("")
 
 	# negative test for messing up packet order 
+	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
+	client.connection_made(cTransport)
+	server.connection_made(sTransport)
+
 	MockVerifyPacket = VerifyPacket()
 	MockVerifyPacket.ID = 1
 	MockVerifyPacket.answer = server._verificationCode
@@ -151,6 +159,10 @@ def basicUnitTestForProtocol():
 	print ("")
 
 	# test for client vericifation result 
+	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
+	client.connection_made(cTransport)
+	server.connection_made(sTransport)
+
 	MockVerifyPacket = VerifyPacket()
 	MockVerifyPacket.ID = 1
 	MockVerifyPacket.answer = server._verificationCode
@@ -163,6 +175,10 @@ def basicUnitTestForProtocol():
 	print ("")
 
 	# negative test for client vericifation result
+	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
+	client.connection_made(cTransport)
+	server.connection_made(sTransport)
+
 	MockVerifyPacket = VerifyPacket()
 	MockVerifyPacket.ID = 1
 	MockVerifyPacket.answer = 0
