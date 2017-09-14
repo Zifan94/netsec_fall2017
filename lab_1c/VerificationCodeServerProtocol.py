@@ -34,7 +34,7 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 		for packet in self._deserializer.nextPackets():
 			if self.transport == None:
 				self.loop.stop()
-				break
+				# break
 			if self.state == "error_state":
 				self.transport.close()
 			if isinstance(packet, RequestPacket):

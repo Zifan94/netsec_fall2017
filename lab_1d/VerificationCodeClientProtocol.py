@@ -36,8 +36,6 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 			outBoundPacket = RequestPacket()
 			outBoundPacket.ID = self.message
 			packetBytes = outBoundPacket.__serialize__()
-			if __name__ =="__main__":
-				print("Client Side: Request packet sent...")
 			self.state = "wait_for_verification_code_packet"
 			self.transport.write(packetBytes)
 
@@ -48,7 +46,6 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 		self.loop.stop()
 
 	def data_received(self, data):
-		print("data received")
 		self._deserializer.update(data)
 		for packet in self._deserializer.nextPackets():
 			if self.transport == None:
@@ -108,9 +105,9 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 if __name__ =="__main__":
 	loop = asyncio.get_event_loop()
 	#coro = loop.create_connection(lambda: VerificationCodeClientProtocol(1, loop), host="127.0.0.1", port=8000)
-	coro = playground.getConnector().create_playground_connection(lambda: VerificationCodeClientProtocol(1, loop), "20174.1.1.1", 101)
+	coro = playground.getConnector().create_playground_connection(lambda: VerificationCodeClientProtocol(1, loop), "20174.1.1.1", 101)	
 	transport, protocol = loop.run_until_complete(coro)
-	protocol.send_request_packet(protocol.callbackForUserVCInput)
-	#protocol.send_request_packet()
+	#protocol.send_request_packet(protocol.callbackForUserVCInput)
+	protocol.send_request_packet()
 	loop.run_forever()
 	loop.close()

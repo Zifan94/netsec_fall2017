@@ -31,7 +31,6 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 		self.loop.stop()
 
 	def data_received(self, data):
-		print("data received")
 		self._deserializer.update(data)
 		for packet in self._deserializer.nextPackets():
 			if self.transport == None:
@@ -93,13 +92,13 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 if __name__ =="__main__":
 	loop = asyncio.get_event_loop()
 	#coro = loop.create_server(lambda: VerificationCodeServerProtocol(loop), port=8000)
-	coro = playground.getConnector().create_playground_server(lambda: VerificationCodeServerProtocol(loop), 101)
+	coro = playground.getConnector().create_playground_server(lambda: VerificationCodeServerProtocol(loop), 101)	
 	server = loop.run_until_complete(coro)
 	try:
 		loop.run_forever()
 	except KeyboardInterrupt:
 		pass
+	
+	server.close()
+	loop.run_until_complete(server.wait_closed())
 	loop.close()
-	# server.close()
-	# loop.run_until_complete(server.wait_closed())
-	# loop.close()
