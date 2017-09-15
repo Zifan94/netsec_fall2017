@@ -1,5 +1,5 @@
 from playground.network.packet import PacketType
-from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER
+from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER, BOOL
 from MyPacket import *
 from VerificationCodeServerProtocol import VerificationCodeServerProtocol
 from VerificationCodeClientProtocol import VerificationCodeClientProtocol
@@ -95,6 +95,27 @@ def basicUnitTestForPacket():
 	assert packet4 != packet4a
 	print ("- negative test for ResultPacket SUCCESS")
 	print ("")
+
+
+	# test for HangUpPacket
+	packet5 = HangUpPacket()
+	packet5.ID = 1
+	packet5.hangup = True
+	packet5Bytes = packet5.__serialize__()
+	packet5a = HangUpPacket.Deserialize(packet5Bytes)
+	assert packet5 == packet5a
+	print ("- test for HangUpPacket SUCCESS")
+
+	# negative test for HangUpPacket
+	packet5 = HangUpPacket()
+	packet5.ID = 1
+	packet5.hangup = True
+	packet5Bytes = packet5.__serialize__()
+	assert packet5 != packet1Bytes
+	print ("- negative test for HangUpPacket SUCCESS")
+	print ("")
+
+
 
 
 
