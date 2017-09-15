@@ -1,5 +1,5 @@
 from playground.network.packet import PacketType
-from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER
+from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER, BOOL
 from MyPacket import *
 
 import random
@@ -33,8 +33,8 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 		self._deserializer.update(data)
 		for packet in self._deserializer.nextPackets():
 			if self.transport == None:
-				self.loop.stop()
-				# break
+				#self.loop.stop()
+				continue
 			if self.state == "error_state":
 				self.transport.close()
 			if isinstance(packet, RequestPacket):
@@ -71,18 +71,28 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 						outBoundPacket.passfail = "fail"
 						self._result = "fail"
 					packetBytes = outBoundPacket.__serialize__()
-					self.state = "finish_state"
+					self.state = "wait_for_hangup_packet"
 					self.transport.write(packetBytes)
 					if __name__ =="__main__":
 						print("Server Side: Verification Result is: %s..."%outBoundPacket.passfail)
+			elif isinstance(packet, HangUpPacket):
+				#print("Server: %s"%self.state)
+				if self.state != "wait_for_hangup_packet":
+					if __name__ =="__main__":
+						print("Server Side: Error: State Error! Expecting wait_for_hangup_packet but getting %s"%self.state)
+					self.state = "error_state"
+					#self.loop.stop()
+				else:
+					self.state = "close_state"
 			else:
 				#print("Server: %s"%self.state)
 				if __name__ =="__main__":
 					print("Client Side: Error: Unexpected data received!")
 				self.state = "error_state"
 			if self.transport == None:
-				self.loop.stop()
-			if self.state == "error_state":
+				#self.loop.stop()
+				continue
+			if self.state == "error_state" or self.state == "close_state":
 				self.transport.close()
 
 		

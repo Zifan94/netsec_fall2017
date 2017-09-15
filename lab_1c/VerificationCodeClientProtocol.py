@@ -1,5 +1,5 @@
 from playground.network.packet import PacketType
-from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER
+from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER, BOOL
 from MyPacket import *
 
 import random
@@ -48,8 +48,9 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 		self._deserializer.update(data)
 		for packet in self._deserializer.nextPackets():
 			if self.transport == None:
-				self.loop.stop()
-			if self.state == "finish_state" or self.state == "error_state":
+				# self.loop.stop()
+				continue
+			if self.state == "error_state":
 				self.transport.close()
 			if isinstance(packet, VerificationCodePacket):
 				#print("Client: %s"%self.state)
@@ -82,15 +83,21 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 				else:
 					if __name__ =="__main__":
 						print("Client Side: Verification %s..."%packet.passfail)
+					outBoundPacket = HangUpPacket()
+					outBoundPacket.ID = packet.ID
+					outBoundPacket.hangup = True
+					packetBytes = outBoundPacket.__serialize__()
 					self.state = "finish_state"
+					self.transport.write(packetBytes)
 			else:
 				#print("Client: %s"%self.state)
 				if __name__ =="__main__":
 					print("Client Side: Error: Unexpected data received!")
 				self.state = "error_state"
 			if self.transport == None:
-				self.loop.stop()
-			if self.state == "finish_state" or self.state == "error_state":
+				#self.loop.stop()
+				continue
+			if self.state == "error_state":
 				self.transport.close()
 
 
