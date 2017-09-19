@@ -1,0 +1,2 @@
+Currently, the client side need to input the verification code manually.
+If you want the client side to send the verification code automatically, please comment the line 150 and use the line 151 in VerificationCodeClientProtocol.py.
