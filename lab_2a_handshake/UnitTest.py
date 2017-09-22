@@ -2,8 +2,8 @@ from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
 from playground.network.packet.fieldtypes.attributes import *
 from HandShake import *
-# from VerificationCodeServerProtocol import VerificationCodeServerProtocol
-# from VerificationCodeClientProtocol import VerificationCodeClientProtocol
+from ServerProtocol import ServerProtocol
+from ClientProtocol import ClientProtocol
 from playground.asyncio_lib.testing import TestLoopEx
 from playground.network.testing import MockTransportToStorageStream as MockTransport
 from playground.network.testing import MockTransportToProtocol
@@ -63,83 +63,59 @@ def basicUnitTestForHandShakePacket():
 
 
 
+def basicUnitTestForProtocol():
+	asyncio.set_event_loop(TestLoopEx())
+	loop = asyncio.get_event_loop()
 
+	server = ServerProtocol(loop)
+	client = ClientProtocol(loop)
+	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
 
-
-# def basicUnitTestForProtocol():
-# 	asyncio.set_event_loop(TestLoopEx())
-# 	loop = asyncio.get_event_loop()
-
-# 	server = VerificationCodeServerProtocol(loop)
-# 	client = VerificationCodeClientProtocol(1, loop)
-# 	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
-
-# 	# test for general connection_made 
-# 	client.connection_made(cTransport)
-# 	server.connection_made(sTransport)
-# 	print("- test for general connection_made SUCCESS")
-# 	print ("")
+	# test for general connection_made 
+	client.connection_made(cTransport)
+	server.connection_made(sTransport)
+	print("- test for general connection_made SUCCESS")
+	print ("")
 	
-# 	# test for client verification code length 
-# 	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
-# 	client.connection_made(cTransport)
-# 	server.connection_made(sTransport)
 
-# 	MockRequestPacket = RequestPacket()
-# 	MockRequestPacket.ID = 1
-# 	packetBytes = MockRequestPacket.__serialize__()
-# 	server.data_received(packetBytes)
-# 	assert len(str(server._verificationCode)) == 6
-# 	print("- test for client verification code length SUCCESS")
-# 	print ("")
+	# negative test for messing up packet order 
+	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
+	client.connection_made(cTransport)
+	server.connection_made(sTransport)
 
-# 	# negative test for messing up packet order 
-# 	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
-# 	client.connection_made(cTransport)
-# 	server.connection_made(sTransport)
+	MockHandShake_SYN = HandShake()
+	MockHandShake_SYN.Type = 1
+	MockHandShake_SYN.SequenceNumber = 1
+	MockHandShake_SYN.Checksum = 1
+	MockHandShake_SYN.Acknowledgement = 1
+	MockHandShake_SYN.HLEN = 96
+	packetBytes = MockHandShake_SYN.__serialize__()
+	server.state = "wait_for_HandShake_ACK"
+	client.state = "wait_for_HandShake_SYNACK"
+	server.data_received(packetBytes)
+	assert server.state == "error_state"
+	print("- negative test for messing up packet order SUCCESS")
+	print ("")
 
-# 	MockVerifyPacket = VerifyPacket()
-# 	MockVerifyPacket.ID = 1
-# 	MockVerifyPacket.answer = server._verificationCode
-# 	packetBytes = MockVerifyPacket.__serialize__()
-# 	server.state = "wait_for_verify_packet"
-# 	client.state = "initial_state"
-# 	server.data_received(packetBytes)
-# 	assert client.state == "error_state"
-# 	print("- negative test for messing up packet order SUCCESS")
-# 	print ("")
+	# test for client vericifation result 
+	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
+	client.connection_made(cTransport)
+	server.connection_made(sTransport)
 
-# 	# test for client vericifation result 
-# 	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
-# 	client.connection_made(cTransport)
-# 	server.connection_made(sTransport)
+	MockHandShake_ACK = HandShake()
+	MockHandShake_ACK.Type = 3
+	MockHandShake_ACK.SequenceNumber = 1
+	MockHandShake_ACK.Checksum = 1
+	MockHandShake_ACK.Acknowledgement = 1
+	MockHandShake_ACK.HLEN = 96
+	packetBytes = MockHandShake_ACK.__serialize__()
+	server.state = "wait_for_HandShake_ACK"
+	client.state = "wait_for_data"
+	server.data_received(packetBytes)
+	assert server.state == "connection_established"
+	print("- test for client vericifation result SUCCESS")
+	print ("")
 
-# 	MockVerifyPacket = VerifyPacket()
-# 	MockVerifyPacket.ID = 1
-# 	MockVerifyPacket.answer = server._verificationCode
-# 	packetBytes = MockVerifyPacket.__serialize__()
-# 	server.state = "wait_for_verify_packet"
-# 	client.state = "wait_for_result_packet"
-# 	server.data_received(packetBytes)
-# 	assert server._result == "pass"
-# 	print("- test for client vericifation result SUCCESS")
-# 	print ("")
-
-# 	# negative test for client vericifation result
-# 	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
-# 	client.connection_made(cTransport)
-# 	server.connection_made(sTransport)
-
-# 	MockVerifyPacket = VerifyPacket()
-# 	MockVerifyPacket.ID = 1
-# 	MockVerifyPacket.answer = 0
-# 	packetBytes = MockVerifyPacket.__serialize__()
-# 	server.state = "wait_for_verify_packet"
-# 	client.state = "wait_for_result_packet"
-# 	server.data_received(packetBytes)
-# 	assert server._result == "fail"
-# 	print("- negative test for client vericifation result SUCCESS")
-# 	print ("")
 
 if __name__ =="__main__":
 	print ("=======================================")
@@ -151,18 +127,30 @@ if __name__ =="__main__":
 	print("### ALL HANDSHAKE PACKET UNIT TEST SUCCESS! ###")
 	print("=====================================")
 
-	# print ("==========================================")
-	# print ("### START BASIC UNIT TEST FOR PROTOCOL ###")
-	# print ("")
-	# basicUnitTestForProtocol()
-	# print("")
-	# print("")
-	# print("### ALL PROTOCOL UNIT TEST SUCCESS! ###")
-	# print("=======================================")
+	print ("==========================================")
+	print ("### START BASIC UNIT TEST FOR PROTOCOL ###")
+	print ("")
+	basicUnitTestForProtocol()
+	print("")
+	print("")
+	print("### ALL PROTOCOL UNIT TEST SUCCESS! ###")
+	print("=======================================")
 
 
 	print()
-	print("  **********************************")
-	print("  ***** ALL UNIT TEST SUCCESS! *****")
-	print("  **********************************")
+	print()
+	print()
+	print()
+	print("*******************************")
+	print("*      All Unit Tests         *")
+	print("*                             *")
+	print("*   ****    *    ****  ****   *")
+	print("*   *  *   * *   *     *      *")
+	print("*   *  *  *   *  *     *      *")
+	print("*   ****  *****  ****  ****   *")
+	print("*   *     *   *     *     *   *")
+	print("*   *     *   *     *     *   *")
+	print("*   *     *   *  ****  ****   *")
+	print("*                             *")
+	print("*******************************")
 	print()

@@ -65,6 +65,7 @@ class ServerProtocol(asyncio.Protocol):
 						if __name__ =="__main__":
 							print("Server Side: ACK reveived")
 							print("Server Side: CONNECTION ESTABLISHED!")
+						self.state = "connection_established"
 			
 			else:
 				if __name__ =="__main__":
