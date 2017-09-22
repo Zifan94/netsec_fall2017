@@ -1,6 +1,7 @@
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
 from HandShake import *
+from Util import *
 from playground.network.common import StackingProtocol, StackingTransport, StackingProtocolFactory
 
 import playground
@@ -34,15 +35,10 @@ class ClientProtocol(asyncio.Protocol):
 			self.loop.stop()
 		else:
 			self._callback = callback
-			outBoundPacket = HandShake()
-			outBoundPacket.Type = 1
-			outBoundPacket.SequenceNumber = random.randint(0, 2147483646/2)
-			outBoundPacket.Checksum = 1
-			outBoundPacket.Acknowledgement = 0
-			outBoundPacket.HLEN = 96
-			packetBytes = outBoundPacket.__serialize__()
+			outBoundPacket = Util.create_outbound_handshake_packet(1, random.randint(0, 2147483646/2), 0)
 			if __name__ =="__main__":
 				print("Client Side: SYN sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber,outBoundPacket.Acknowledgement))
+			packetBytes = outBoundPacket.__serialize__()
 			self.state = "wait_for_HandShake_SYNACK"
 			self.transport.write(packetBytes)
 
@@ -65,12 +61,7 @@ class ClientProtocol(asyncio.Protocol):
 							print("Client Side: Error: State Error! Expecting wait_for_HandShake_SYNACK but getting %s"%self.state)
 						self.state = "error_state"
 					else:
-						outBoundPacket = HandShake()
-						outBoundPacket.Type = 3
-						outBoundPacket.SequenceNumber = packet.Acknowledgement+1
-						outBoundPacket.Checksum = 1
-						outBoundPacket.Acknowledgement = packet.SequenceNumber+1
-						outBoundPacket.HLEN = 96
+						outBoundPacket = Util.create_outbound_handshake_packet(3, packet.Acknowledgement+1, packet.SequenceNumber+1)
 						if __name__ =="__main__":
 							print("Client Side: SYN-ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Client Side: ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))

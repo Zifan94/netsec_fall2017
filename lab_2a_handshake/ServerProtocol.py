@@ -1,6 +1,7 @@
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
 from HandShake import *
+from Util import *
 from playground.network.common import StackingProtocol, StackingTransport, StackingProtocolFactory
 
 import playground
@@ -43,12 +44,7 @@ class ServerProtocol(asyncio.Protocol):
 							print("Server Side: Error: State Error! Expecting wait_for_HandShake_SYN but getting %s"%self.state)
 						self.state = "error_state"
 					else:
-						outBoundPacket = HandShake()
-						outBoundPacket.Type = 2
-						outBoundPacket.SequenceNumber = random.randint(0, 2147483646/2)
-						outBoundPacket.Checksum = 1
-						outBoundPacket.Acknowledgement = packet.SequenceNumber+1
-						outBoundPacket.HLEN = 96
+						outBoundPacket = Util.create_outbound_handshake_packet(2, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
 						if __name__ =="__main__":
 							print("Server Side: SYN reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: SYN-ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
@@ -63,7 +59,7 @@ class ServerProtocol(asyncio.Protocol):
 						self.state = "error_state"
 					else:
 						if __name__ =="__main__":
-							print("Server Side: ACK reveived")
+							print("Server Side: ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: CONNECTION ESTABLISHED!")
 						self.state = "connection_established"
 			
