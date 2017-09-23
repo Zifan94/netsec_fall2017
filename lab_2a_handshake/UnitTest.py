@@ -84,15 +84,16 @@ def basicUnitTestForProtocol():
 	server.connection_made(sTransport)
 
 	MockHandShake_SYN = HandShake()
-	MockHandShake_SYN.Type = 1
+	MockHandShake_SYN.Type = 0
 	MockHandShake_SYN.SequenceNumber = 1
 	MockHandShake_SYN.Checksum = 1
 	MockHandShake_SYN.Acknowledgement = 1
 	MockHandShake_SYN.HLEN = 96
 	packetBytes = MockHandShake_SYN.__serialize__()
-	server.state = "wait_for_HandShake_ACK"
-	client.state = "wait_for_HandShake_SYNACK"
+	server.state = "SYN_State"
+	client.state = "SYN_ACK_State"
 	server.data_received(packetBytes)
+	print(server.state)
 	assert server.state == "error_state"
 	print("- negative test for messing up packet order SUCCESS")
 	print ("")
@@ -103,16 +104,16 @@ def basicUnitTestForProtocol():
 	server.connection_made(sTransport)
 
 	MockHandShake_ACK = HandShake()
-	MockHandShake_ACK.Type = 3
+	MockHandShake_ACK.Type = 2
 	MockHandShake_ACK.SequenceNumber = 1
 	MockHandShake_ACK.Checksum = 1
 	MockHandShake_ACK.Acknowledgement = 1
 	MockHandShake_ACK.HLEN = 96
 	packetBytes = MockHandShake_ACK.__serialize__()
-	server.state = "wait_for_HandShake_ACK"
-	client.state = "wait_for_data"
+	server.state = "SYN_State"
+	client.state = "Transmission_State"
 	server.data_received(packetBytes)
-	assert server.state == "connection_established"
+	assert server.state == "Tramsmission_State"
 	print("- test for client vericifation result SUCCESS")
 	print ("")
 

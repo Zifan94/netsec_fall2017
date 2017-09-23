@@ -11,14 +11,14 @@ import random
 import asyncio
 
 class ServerProtocol(asyncio.Protocol):
-	state = "wait_for_HandShake_SYN"
+	state = "SYN_ACK_State"
 	def __init__(self, loop):
 		if __name__ =="__main__":
 			print("Server Side: Init Compelete...")
 		self.loop = loop
 		self._deserializer = PacketType.Deserializer()
 		self.transport = None
-		self.state = "wait_for_HandShake_SYN"
+		self.state = "SYN_ACK_State"
 
 	def connection_made(self, transport):
 		if __name__ =="__main__":
@@ -37,31 +37,30 @@ class ServerProtocol(asyncio.Protocol):
 			if self.transport == None:
 				continue
 			if isinstance(packet, HandShake):
-				# check checksum here, if checksum is incorrected, set "checksum_fail_state"
-				if packet.Type == 1:	# incoming an SYN-ACK handshake packet
-					if self.state != "wait_for_HandShake_SYN":
+				if packet.Type == 0:	# incoming an SYN-ACK handshake packet
+					if self.state != "SYN_ACK_State":
 						if __name__ =="__main__":
-							print("Server Side: Error: State Error! Expecting wait_for_HandShake_SYN but getting %s"%self.state)
+							print("Server Side: Error: State Error! Expecting SYN_ACK_State but getting %s"%self.state)
 						self.state = "error_state"
 					else:
-						outBoundPacket = Util.create_outbound_handshake_packet(2, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
+						outBoundPacket = Util.create_outbound_handshake_packet(1, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
 						if __name__ =="__main__":
 							print("Server Side: SYN reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: SYN-ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
 						packetBytes = outBoundPacket.__serialize__()
-						self.state = "wait_for_HandShake_ACK"
+						self.state = "SYN_State"
 						self.transport.write(packetBytes)
 
-				elif packet.Type == 3:	# incoming an ACK handshake packet
-					if self.state != "wait_for_HandShake_ACK":
+				elif packet.Type == 2:	# incoming an ACK handshake packet
+					if self.state != "SYN_State":
 						if __name__ =="__main__":
-							print("Server Side: Error: State Error! Expecting wait_for_HandShake_ACK but getting %s"%self.state)
+							print("Server Side: Error: State Error! Expecting SYN_State but getting %s"%self.state)
 						self.state = "error_state"
 					else:
 						if __name__ =="__main__":
 							print("Server Side: ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: CONNECTION ESTABLISHED!")
-						self.state = "connection_established"
+						self.state = "Tramsmission_State"
 			
 			else:
 				if __name__ =="__main__":

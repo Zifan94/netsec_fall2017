@@ -11,14 +11,14 @@ import random
 import asyncio
 
 class ClientProtocol(asyncio.Protocol):
-	state = "initial_state"
+	state = "Initial_SYN_State"
 	def __init__(self, loop):
 		if __name__ =="__main__":
 			print("Client Side: Init Compelete...")
 		self.loop = loop
 		self._deserializer = PacketType.Deserializer()
 		self.transport = None
-		self.state = "initial_state"
+		self.state = "Initial_SYN_State"
 
 	def connection_made(self, transport):
 		if __name__ =="__main__":
@@ -27,19 +27,19 @@ class ClientProtocol(asyncio.Protocol):
 
 	def send_request_packet(self, callback=None):
 		#print("Client: %s"%self.state)
-		if self.state != "initial_state":
+		if self.state != "Initial_SYN_State":
 			if __name__ =="__main__":
-				print("Client Side: Error: State Error! Expecting initial_state but getting %s"%self.state)
+				print("Client Side: Error: State Error! Expecting Initial_SYN_State but getting %s"%self.state)
 			self.state = "error_state"
 			self.transport.close()
 			self.loop.stop()
 		else:
 			self._callback = callback
-			outBoundPacket = Util.create_outbound_handshake_packet(1, random.randint(0, 2147483646/2), 0)
+			outBoundPacket = Util.create_outbound_handshake_packet(0, random.randint(0, 2147483646/2), 0)
 			if __name__ =="__main__":
 				print("Client Side: SYN sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber,outBoundPacket.Acknowledgement))
 			packetBytes = outBoundPacket.__serialize__()
-			self.state = "wait_for_HandShake_SYNACK"
+			self.state = "SYN_ACK_State"
 			self.transport.write(packetBytes)
 
 	def connection_lost(self, exc=None):
@@ -54,19 +54,18 @@ class ClientProtocol(asyncio.Protocol):
 			if self.transport == None:
 				continue
 			if isinstance(packet, HandShake):
-				# check checksum here, if checksum is incorrected, set "checksum_fail_state"
-				if packet.Type == 2:	# incoming an SYN-ACK handshake packet
-					if self.state != "wait_for_HandShake_SYNACK":
+				if packet.Type == 1:	# incoming an SYN-ACK handshake packet
+					if self.state != "SYN_ACK_State":
 						if __name__ =="__main__":
-							print("Client Side: Error: State Error! Expecting wait_for_HandShake_SYNACK but getting %s"%self.state)
+							print("Client Side: Error: State Error! Expecting SYN_ACK_State but getting %s"%self.state)
 						self.state = "error_state"
 					else:
-						outBoundPacket = Util.create_outbound_handshake_packet(3, packet.Acknowledgement+1, packet.SequenceNumber+1)
+						outBoundPacket = Util.create_outbound_handshake_packet(2, packet.Acknowledgement+1, packet.SequenceNumber+1)
 						if __name__ =="__main__":
 							print("Client Side: SYN-ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Client Side: ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
 						packetBytes = outBoundPacket.__serialize__()
-						self.state = "wait_for_data"
+						self.state = "Transmission_State"
 						self.transport.write(packetBytes)
 				else: 
 					if __name__ =="__main__":
