@@ -36,6 +36,12 @@ class ClientProtocol(asyncio.Protocol):
 		else:
 			self._callback = callback
 			outBoundPacket = Util.create_outbound_handshake_packet(0, random.randint(0, 2147483646/2), 0)
+
+			# prepare checksum
+			checksum_bytes = Util.prepare_checksum_bytes(outBoundPacket.Type, outBoundPacket.SequenceNumber, 0, 0)
+			checksum = Util.checksum(checksum_bytes)
+			outBoundPacket.checksum = checksum
+			
 			if __name__ =="__main__":
 				print("Client Side: SYN sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber,outBoundPacket.Acknowledgement))
 			packetBytes = outBoundPacket.__serialize__()
@@ -67,11 +73,11 @@ class ClientProtocol(asyncio.Protocol):
 						packetBytes = outBoundPacket.__serialize__()
 						self.state = "Transmission_State"
 						self.transport.write(packetBytes)
-				else: 
+				else:
 					if __name__ =="__main__":
 						print("Client Side: Error: Unrecognize HandShake Type received!")
 					self.state = "error_state"
-			
+
 			else:
 				if __name__ =="__main__":
 					print("Client Side: Error: Unexpected data received!")
@@ -82,7 +88,7 @@ class ClientProtocol(asyncio.Protocol):
 
 
 
-	
+
 
 	def callbackForUserVCInput(self):
 		answer = input("Client Side: Please input the verification code: ")
@@ -91,7 +97,7 @@ class ClientProtocol(asyncio.Protocol):
 if __name__ =="__main__":
 	loop = asyncio.get_event_loop()
 	#coro = loop.create_connection(lambda: VerificationCodeClientProtocol(1, loop), host="127.0.0.1", port=8000)
-	coro = playground.getConnector().create_playground_connection(lambda: ClientProtocol(loop), "20174.1.1.1", 101)	
+	coro = playground.getConnector().create_playground_connection(lambda: ClientProtocol(loop), "20174.1.1.1", 101)
 	transport, protocol = loop.run_until_complete(coro)
 	#protocol.send_request_packet(protocol.callbackForUserVCInput)
 	protocol.send_request_packet()
