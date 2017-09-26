@@ -5,7 +5,7 @@ from PEEPPacket import *
 class Util():
 	@staticmethod
 	def create_outbound_handshake_packet(Type, seqNum=None, ackNum=None, data=None):
-		outBoundPacket = HandShake()
+		outBoundPacket = PEEPPacket()
 		outBoundPacket.Type = Type
 		if seqNum != None: outBoundPacket.SequenceNumber = seqNum
 		if ackNum != None: outBoundPacket.Acknowledgement = ackNum
