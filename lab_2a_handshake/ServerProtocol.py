@@ -37,7 +37,8 @@ class ServerProtocol(asyncio.Protocol):
 			if self.transport == None:
 				continue
 			if isinstance(packet, HandShake):
-				if packet.Acknowledgement == None:
+				print (packet.Acknowledgement)
+				if packet.Acknowledgement == 0:
 					checksum_bytes = Util.prepare_checksum_bytes(packet.Type, packet.SequenceNumber)
 				else:
 					checksum_bytes = Util.prepare_checksum_bytes(packet.Type, packet.SequenceNumber, packet.Acknowledgement)
@@ -57,7 +58,7 @@ class ServerProtocol(asyncio.Protocol):
 					else:
 						outBoundPacket = Util.create_outbound_handshake_packet(1, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
 						checksum_bytes = Util.prepare_checksum_bytes(outBoundPacket.Type, outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement)
-						checksum = Util.Checksum(checksum_bytes)
+						checksum = Util.checksum(checksum_bytes)
 						outBoundPacket.Checksum = checksum
 						if __name__ =="__main__":
 							print("Server Side: SYN reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
