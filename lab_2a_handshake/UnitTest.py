@@ -88,7 +88,7 @@ def basicUnitTestForProtocol():
 	MockPEEPPacket_SYN.SequenceNumber = 1
 	MockPEEPPacket_SYN.Checksum = 1
 	MockPEEPPacket_SYN.Acknowledgement = 1
-	MockPEEPPacket_SYN.Data = 96
+	MockPEEPPacket_SYN.Data = b"data"
 	packetBytes = MockPEEPPacket_SYN.__serialize__()
 	server.state = "SYN_State"
 	client.state = "SYN_ACK_State"
@@ -108,12 +108,12 @@ def basicUnitTestForProtocol():
 	MockPEEPPacket_ACK.SequenceNumber = 1
 	MockPEEPPacket_ACK.Checksum = 1
 	MockPEEPPacket_ACK.Acknowledgement = 1
-	MockPEEPPacket_ACK.Data = 96
+	MockPEEPPacket_ACK.Data = b"data"
 	packetBytes = MockPEEPPacket_ACK.__serialize__()
 	server.state = "SYN_State"
 	client.state = "Transmission_State"
 	server.data_received(packetBytes)
-	assert server.state == "Tramsmission_State"
+	assert server.state == "Transmission_State"
 	print("- test for client vericifation result SUCCESS")
 	print ("")
 

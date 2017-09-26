@@ -18,7 +18,7 @@ class Util():
 
 	@staticmethod
 	def hasValidChecksum(inBoundPacket): #just wrapping up the two function below
-		checksum_bytes = Util.prepare_checksum_bytes(inBoundPacket.Type, inBoundPacket.SequenceNumber, inBoundPacket.Acknowledgement, inBoundPacket.HLEN)
+		checksum_bytes = Util.prepare_checksum_bytes(inBoundPacket.Type, inBoundPacket.SequenceNumber, inBoundPacket.Acknowledgement, inBoundPacket.Data)
 		return Util.is_valid_checksum(checksum_bytes, inBoundPacket.Checksum)
 
 
