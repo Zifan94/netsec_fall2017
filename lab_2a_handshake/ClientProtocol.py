@@ -46,6 +46,7 @@ class ClientProtocol(asyncio.Protocol):
 		else:
 			self._callback = callback
 			outBoundPacket = Util.create_outbound_packet(0, random.randint(0, 2147483646/2))
+
 			if __name__ =="__main__":
 				print("Client Side: SYN sent: Seq = %d"%(outBoundPacket.SequenceNumber))
 			packetBytes = outBoundPacket.__serialize__()
