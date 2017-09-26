@@ -2,8 +2,8 @@ from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
 from playground.network.packet.fieldtypes.attributes import *
 
-class HandShake(PacketType):
-	DEFINITION_IDENTIFIER = "PEEP-Handshake"
+class PEEPPacket(PacketType):
+	DEFINITION_IDENTIFIER = "PEEP.Packet"
 	DEFINITION_VERSION = "1.0"
 
 	FIELDS = [
@@ -11,7 +11,7 @@ class HandShake(PacketType):
 		("SequenceNumber", UINT32({Optional: True})),
 		("Checksum", UINT16),
 		("Acknowledgement", UINT32({Optional: True})),
-		("HLEN", UINT8({Optional: True}))
+		("Data", BUFFER({Optional: True}))
 	]
 
 	# SYN -		TYPE 0

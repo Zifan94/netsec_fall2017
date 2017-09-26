@@ -1,16 +1,16 @@
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
-from HandShake import *
+from PEEPPacket import *
 
 class Util():
 	@staticmethod
 	def create_outbound_handshake_packet(Type, seqNum=None, ackNum=None, data=None):
-		outBoundPacket = HandShake()
+		outBoundPacket = PEEPPacket()
 		outBoundPacket.Type = Type
 		if seqNum != None: outBoundPacket.SequenceNumber = seqNum
 		if ackNum != None: outBoundPacket.Acknowledgement = ackNum
-		
-		checksum_bytes = Util.prepare_checksum_bytes(Type=outBoundPacket.Type, seqNum=outBoundPacket.SequenceNumber, ackNum=outBoundPacket.Acknowledgement, data=outBoundPacket.HLEN)
+
+		checksum_bytes = Util.prepare_checksum_bytes(Type=outBoundPacket.Type, seqNum=outBoundPacket.SequenceNumber, ackNum=outBoundPacket.Acknowledgement, data=outBoundPacket.Data)
 		checksum = Util.checksum(checksum_bytes)
 		outBoundPacket.Checksum = checksum
 
@@ -18,7 +18,7 @@ class Util():
 
 	@staticmethod
 	def hasValidChecksum(inBoundPacket): #just wrapping up the two function below
-		checksum_bytes = Util.prepare_checksum_bytes(inBoundPacket.Type, inBoundPacket.SequenceNumber, inBoundPacket.Acknowledgement, inBoundPacket.HLEN)
+		checksum_bytes = Util.prepare_checksum_bytes(inBoundPacket.Type, inBoundPacket.SequenceNumber, inBoundPacket.Acknowledgement, inBoundPacket.Data)
 		return Util.is_valid_checksum(checksum_bytes, inBoundPacket.Checksum)
 
 
