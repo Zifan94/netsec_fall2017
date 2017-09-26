@@ -11,17 +11,9 @@ class Util():
 		if ackNum != None: outBoundPacket.Acknowledgement = ackNum
 		outBoundPacket.HLEN = 96
 		outBoundPacket.Checksum = 0; # initialization
-		outBoundPacket.Checksum = Util.calculate_check_sum(outBoundPacket)
+		#outBoundPacket.Checksum = Util.calculate_check_sum(outBoundPacket)
 
 		return outBoundPacket
-
-	@staticmethod
-	def calculate_check_sum(packet):
-		if isinstance(packet, HandShake):
-			return 1;  # TODO: implement checksum here
-		else:
-			print("CheckSum calculate failed!")
-			return 9999999;
 
 	""" *****************************************************************
 	*** checksum function is a modified version of Jason Orendorff's  ***
@@ -30,6 +22,7 @@ class Util():
 	******************************************************************"""
 
 	# add each 16 bit word to total and handle overflow
+	@staticmethod
 	def carry_around_add(a,b):
 	    c = a + b
 	    return (c & 0xffff) + (c >> 16)
@@ -44,7 +37,7 @@ class Util():
 	    # convert each 16 bit word from string into type byte and add to total
 	    for i in range(0, len(msg), 2):
 	        word = ord(msg[i]) + (ord(msg[i+1]) << 8)
-	        total = carry_around_add(total, word)
+	        total = Util.carry_around_add(total, word)
 	    return ~total & 0xffff
 
 	# verify checksum
@@ -55,7 +48,7 @@ class Util():
 	        msg += "\x00"
 	    for i in range(0, len(msg), 2):
 	        word = ord(msg[i]) + (ord(msg[i+1]) << 8)
-	        total = carry_around_add(total, word)
+	        total = Util.carry_around_add(total, word)
 	    total = total & 0xffff
 	    return (total + checksum) == 0xffff
 

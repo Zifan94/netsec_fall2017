@@ -38,10 +38,10 @@ class ClientProtocol(asyncio.Protocol):
 			outBoundPacket = Util.create_outbound_handshake_packet(0, random.randint(0, 2147483646/2), 0)
 
 			# prepare checksum
-			checksum_bytes = Util.prepare_checksum_bytes(outBoundPacket.Type, outBoundPacket.SequenceNumber, 0, 0)
+			checksum_bytes = Util.prepare_checksum_bytes(outBoundPacket.Type, outBoundPacket.SequenceNumber)
 			checksum = Util.checksum(checksum_bytes)
-			outBoundPacket.checksum = checksum
-			
+			outBoundPacket.Checksum = checksum
+
 			if __name__ =="__main__":
 				print("Client Side: SYN sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber,outBoundPacket.Acknowledgement))
 			packetBytes = outBoundPacket.__serialize__()
@@ -60,6 +60,16 @@ class ClientProtocol(asyncio.Protocol):
 			if self.transport == None:
 				continue
 			if isinstance(packet, HandShake):
+				# Check if checksum is valid
+				checksum_bytes = Util.prepare_checksum_bytes(packet.Type, packet.SequenceNumber, packet.Acknowledgement)
+				valid = Util.is_valid_checksum(checksum_bytes, packet.Checksum)
+				if (valid == 0):
+					print("client side: checksum is bad")
+					self.state = "error_state"
+					self.transport.close()
+					self.loop.stop()
+				else: print("client side: checksum is good")
+
 				if packet.Type == 1:	# incoming an SYN-ACK handshake packet
 					if self.state != "SYN_ACK_State":
 						if __name__ =="__main__":
@@ -67,6 +77,9 @@ class ClientProtocol(asyncio.Protocol):
 						self.state = "error_state"
 					else:
 						outBoundPacket = Util.create_outbound_handshake_packet(2, packet.Acknowledgement+1, packet.SequenceNumber+1)
+						checksum_bytes = Util.prepare_checksum_bytes(outBoundPacket.Type, outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement)
+						checksum = Util.checksum(checksum_bytes)
+						outBoundPacket.Checksum = checksum
 						if __name__ =="__main__":
 							print("Client Side: SYN-ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Client Side: ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))

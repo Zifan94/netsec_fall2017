@@ -37,6 +37,18 @@ class ServerProtocol(asyncio.Protocol):
 			if self.transport == None:
 				continue
 			if isinstance(packet, HandShake):
+				if packet.Acknowledgement == None:
+					checksum_bytes = Util.prepare_checksum_bytes(packet.Type, packet.SequenceNumber)
+				else:
+					checksum_bytes = Util.prepare_checksum_bytes(packet.Type, packet.SequenceNumber, packet.Acknowledgement)
+				valid = Util.is_valid_checksum(checksum_bytes, packet.Checksum)
+				if (valid == 0):
+					outBoundPacket = Util.create_outbound_handshake_packet(5, random.randint(0, 2147483646/2), packet.SequenceNumber+1) # maybe a different sequence number
+					self.state = "error_state"
+					print("Checksum error, resetting connection")
+					packetBytes = outBoundPacket.__serialize__()
+					self.transport.write(packetBytes)
+				else: print("server checksum good")
 				if packet.Type == 0:	# incoming an SYN-ACK handshake packet
 					if self.state != "SYN_ACK_State":
 						if __name__ =="__main__":
@@ -44,6 +56,9 @@ class ServerProtocol(asyncio.Protocol):
 						self.state = "error_state"
 					else:
 						outBoundPacket = Util.create_outbound_handshake_packet(1, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
+						checksum_bytes = Util.prepare_checksum_bytes(outBoundPacket.Type, outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement)
+						checksum = Util.Checksum(checksum_bytes)
+						outBoundPacket.Checksum = checksum
 						if __name__ =="__main__":
 							print("Server Side: SYN reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: SYN-ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
@@ -57,11 +72,12 @@ class ServerProtocol(asyncio.Protocol):
 							print("Server Side: Error: State Error! Expecting SYN_State but getting %s"%self.state)
 						self.state = "error_state"
 					else:
+
 						if __name__ =="__main__":
 							print("Server Side: ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: CONNECTION ESTABLISHED!")
 						self.state = "Tramsmission_State"
-			
+
 			else:
 				if __name__ =="__main__":
 					print("Server Side: Error: Unexpected data received!")
@@ -69,8 +85,8 @@ class ServerProtocol(asyncio.Protocol):
 			if self.transport == None:
 				continue
 
-		
-			
+
+
 
 if __name__ =="__main__":
 	loop = asyncio.get_event_loop()
@@ -81,7 +97,7 @@ if __name__ =="__main__":
 		loop.run_forever()
 	except KeyboardInterrupt:
 		pass
-	
+
 	#server.close()
 	#loop.run_until_complete(server.wait_closed())
 	loop.close()
