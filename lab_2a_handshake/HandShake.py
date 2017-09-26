@@ -11,7 +11,7 @@ class HandShake(PacketType):
 		("SequenceNumber", UINT32({Optional: True})),
 		("Checksum", UINT16),
 		("Acknowledgement", UINT32({Optional: True})),
-		("HLEN", UINT8)
+		("HLEN", UINT8({Optional: True}))
 	]
 
 	# SYN -		TYPE 0
