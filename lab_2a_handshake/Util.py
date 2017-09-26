@@ -4,16 +4,24 @@ from PEEPPacket import *
 
 class Util():
 	@staticmethod
-	def create_outbound_handshake_packet(Type, seqNum=None, ackNum=None):
+	def create_outbound_handshake_packet(Type, seqNum=None, ackNum=None, data=None):
 		outBoundPacket = HandShake()
 		outBoundPacket.Type = Type
 		if seqNum != None: outBoundPacket.SequenceNumber = seqNum
 		if ackNum != None: outBoundPacket.Acknowledgement = ackNum
-		outBoundPacket.HLEN = 96
-		outBoundPacket.Checksum = 0; # initialization
-		#outBoundPacket.Checksum = Util.calculate_check_sum(outBoundPacket)
+
+		checksum_bytes = Util.prepare_checksum_bytes(Type=outBoundPacket.Type, seqNum=outBoundPacket.SequenceNumber, ackNum=outBoundPacket.Acknowledgement, data=outBoundPacket.Data)
+		checksum = Util.checksum(checksum_bytes)
+		outBoundPacket.Checksum = checksum
 
 		return outBoundPacket
+
+	@staticmethod
+	def hasValidChecksum(inBoundPacket): #just wrapping up the two function below
+		checksum_bytes = Util.prepare_checksum_bytes(inBoundPacket.Type, inBoundPacket.SequenceNumber, inBoundPacket.Acknowledgement, inBoundPacket.HLEN)
+		return Util.is_valid_checksum(checksum_bytes, inBoundPacket.Checksum)
+
+
 
 	""" *****************************************************************
 	*** checksum function is a modified version of Jason Orendorff's  ***
