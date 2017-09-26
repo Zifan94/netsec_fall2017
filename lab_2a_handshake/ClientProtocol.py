@@ -36,6 +36,12 @@ class ClientProtocol(asyncio.Protocol):
 		else:
 			self._callback = callback
 			outBoundPacket = Util.create_outbound_handshake_packet(0, random.randint(0, 2147483646/2), 0)
+
+			# prepare checksum
+			checksum_bytes = Util.prepare_checksum_bytes(outBoundPacket.Type, outBoundPacket.SequenceNumber)
+			checksum = Util.checksum(checksum_bytes)
+			outBoundPacket.Checksum = checksum
+
 			if __name__ =="__main__":
 				print("Client Side: SYN sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber,outBoundPacket.Acknowledgement))
 			packetBytes = outBoundPacket.__serialize__()
@@ -54,6 +60,16 @@ class ClientProtocol(asyncio.Protocol):
 			if self.transport == None:
 				continue
 			if isinstance(packet, HandShake):
+				# Check if checksum is valid
+				checksum_bytes = Util.prepare_checksum_bytes(packet.Type, packet.SequenceNumber, packet.Acknowledgement)
+				valid = Util.is_valid_checksum(checksum_bytes, packet.Checksum)
+				if (valid == 0):
+					print("client side: checksum is bad")
+					self.state = "error_state"
+					self.transport.close()
+					self.loop.stop()
+				else: print("client side: checksum is good")
+
 				if packet.Type == 1:	# incoming an SYN-ACK handshake packet
 					if self.state != "SYN_ACK_State":
 						if __name__ =="__main__":
@@ -61,17 +77,20 @@ class ClientProtocol(asyncio.Protocol):
 						self.state = "error_state"
 					else:
 						outBoundPacket = Util.create_outbound_handshake_packet(2, packet.Acknowledgement+1, packet.SequenceNumber+1)
+						checksum_bytes = Util.prepare_checksum_bytes(outBoundPacket.Type, outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement)
+						checksum = Util.checksum(checksum_bytes)
+						outBoundPacket.Checksum = checksum
 						if __name__ =="__main__":
 							print("Client Side: SYN-ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Client Side: ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
 						packetBytes = outBoundPacket.__serialize__()
 						self.state = "Transmission_State"
 						self.transport.write(packetBytes)
-				else: 
+				else:
 					if __name__ =="__main__":
 						print("Client Side: Error: Unrecognize HandShake Type received!")
 					self.state = "error_state"
-			
+
 			else:
 				if __name__ =="__main__":
 					print("Client Side: Error: Unexpected data received!")
@@ -82,7 +101,7 @@ class ClientProtocol(asyncio.Protocol):
 
 
 
-	
+
 
 	def callbackForUserVCInput(self):
 		answer = input("Client Side: Please input the verification code: ")
@@ -91,7 +110,7 @@ class ClientProtocol(asyncio.Protocol):
 if __name__ =="__main__":
 	loop = asyncio.get_event_loop()
 	#coro = loop.create_connection(lambda: VerificationCodeClientProtocol(1, loop), host="127.0.0.1", port=8000)
-	coro = playground.getConnector().create_playground_connection(lambda: ClientProtocol(loop), "20174.1.1.1", 101)	
+	coro = playground.getConnector().create_playground_connection(lambda: ClientProtocol(loop), "20174.1.1.1", 101)
 	transport, protocol = loop.run_until_complete(coro)
 	#protocol.send_request_packet(protocol.callbackForUserVCInput)
 	protocol.send_request_packet()
