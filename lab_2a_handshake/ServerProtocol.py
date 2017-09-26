@@ -34,32 +34,25 @@ class ServerProtocol(asyncio.Protocol):
 	def data_received(self, data):
 		self._deserializer.update(data)
 		for packet in self._deserializer.nextPackets():
+			print()
 			if self.transport == None:
 				continue
-			if isinstance(packet, HandShake):
-				print (packet.Acknowledgement)
-				if packet.Acknowledgement == 0:
-					checksum_bytes = Util.prepare_checksum_bytes(packet.Type, packet.SequenceNumber)
-				else:
-					checksum_bytes = Util.prepare_checksum_bytes(packet.Type, packet.SequenceNumber, packet.Acknowledgement)
-				valid = Util.is_valid_checksum(checksum_bytes, packet.Checksum)
-				if (valid == 0):
-					outBoundPacket = Util.create_outbound_handshake_packet(5, random.randint(0, 2147483646/2), packet.SequenceNumber+1) # maybe a different sequence number
-					self.state = "error_state"
-					print("Checksum error, resetting connection")
-					packetBytes = outBoundPacket.__serialize__()
-					self.transport.write(packetBytes)
-				else: print("server checksum good")
-				if packet.Type == 0:	# incoming an SYN-ACK handshake packet
+
+			#Do checksum verification first!
+			if (Util.hasValidChecksum(packet) == 0): 
+				print("Server side: checksum is bad")
+				self.state = "error_state"
+			else: # checksum is good, now we look into the packet
+				print("Server side: checksum is good")
+				
+				if packet.Type == 0:	# incoming an SYN handshake packet
 					if self.state != "SYN_ACK_State":
 						if __name__ =="__main__":
 							print("Server Side: Error: State Error! Expecting SYN_ACK_State but getting %s"%self.state)
 						self.state = "error_state"
 					else:
 						outBoundPacket = Util.create_outbound_handshake_packet(1, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
-						checksum_bytes = Util.prepare_checksum_bytes(outBoundPacket.Type, outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement)
-						checksum = Util.checksum(checksum_bytes)
-						outBoundPacket.Checksum = checksum
+
 						if __name__ =="__main__":
 							print("Server Side: SYN reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: SYN-ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
@@ -79,12 +72,11 @@ class ServerProtocol(asyncio.Protocol):
 							print("Server Side: CONNECTION ESTABLISHED!")
 						self.state = "Tramsmission_State"
 
-			else:
-				if __name__ =="__main__":
-					print("Server Side: Error: Unexpected data received!")
-				self.state = "error_state"
 			if self.transport == None:
 				continue
+			if self.state == "error_state":
+				self.transport.close()
+				self.loop.stop()
 
 
 
