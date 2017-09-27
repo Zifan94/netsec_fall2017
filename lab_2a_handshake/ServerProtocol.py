@@ -72,7 +72,7 @@ class ServerProtocol(asyncio.Protocol):
 						if __name__ =="__main__":
 							print("Server Side: ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: CONNECTION ESTABLISHED!")
-						self.state = "Tramsmission_State"
+						self.state = "Transmission_State"
 
 			if self.transport == None:
 				continue

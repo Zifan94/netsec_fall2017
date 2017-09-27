@@ -96,7 +96,8 @@ def basicUnitTestForProtocol():
 	server.state = "SYN_State"
 	client.state = "Transmission_State"
 	server.data_received(packetBytes)
-	assert server.state == "Tramsmission_State"
+	assert server.state == "Transmission_State"
+	assert client.state == "Transmission_State"
 	print("- test for client vericifation result SUCCESS")
 	print ("")
 
