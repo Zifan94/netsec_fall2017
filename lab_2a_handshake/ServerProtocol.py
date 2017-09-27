@@ -11,14 +11,14 @@ import random
 import asyncio
 
 class ServerProtocol(asyncio.Protocol):
-	state = "SYN_ACK_State"
+	state = "SYN_ACK_State_0"
 	def __init__(self, loop):
 		if __name__ =="__main__":
 			print("Server Side: Init Compelete...")
 		self.loop = loop
 		self._deserializer = PacketType.Deserializer()
 		self.transport = None
-		self.state = "SYN_ACK_State"
+		self.state = "SYN_ACK_State_0"
 
 	def connection_made(self, transport):
 		if __name__ =="__main__":
@@ -46,7 +46,7 @@ class ServerProtocol(asyncio.Protocol):
 				print("Server side: checksum is good")
 				
 				if packet.Type == 0:	# incoming an SYN handshake packet
-					if self.state != "SYN_ACK_State":
+					if self.state != "SYN_ACK_State_0":
 						if __name__ =="__main__":
 							print("Server Side: Error: State Error! Expecting SYN_ACK_State but getting %s"%self.state)
 						self.state = "error_state"
@@ -57,11 +57,11 @@ class ServerProtocol(asyncio.Protocol):
 							print("Server Side: SYN reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: SYN-ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
 						packetBytes = outBoundPacket.__serialize__()
-						self.state = "SYN_State"
+						self.state = "SYN_State_1"
 						self.transport.write(packetBytes)
 
 				elif packet.Type == 2:	# incoming an ACK handshake packet
-					if self.state != "SYN_State":
+					if self.state != "SYN_State_1":
 						if __name__ =="__main__":
 							print("Server Side: Error: State Error! Expecting SYN_State but getting %s"%self.state)
 						self.state = "error_state"
@@ -70,7 +70,7 @@ class ServerProtocol(asyncio.Protocol):
 						if __name__ =="__main__":
 							print("Server Side: ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: CONNECTION ESTABLISHED!")
-						self.state = "Tramsmission_State"
+						self.state = "Tramsmission_State_2"
 
 			if self.transport == None:
 				continue
