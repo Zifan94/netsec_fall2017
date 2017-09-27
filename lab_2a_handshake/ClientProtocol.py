@@ -32,6 +32,8 @@ class ClientProtocol(asyncio.Protocol):
         await asyncio.sleep(self.TIMEOUTLIMIT)
         if self.state == "SYN_ACK_State_1":
             print("Time-out. Close Connection.")
+			self.state = "error_state"
+            self.transport.close()
             self.loop.stop()
 
     def send_request_packet(self, callback=None):
