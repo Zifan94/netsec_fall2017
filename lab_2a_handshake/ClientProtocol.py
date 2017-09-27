@@ -11,14 +11,14 @@ import random
 import asyncio
 
 class ClientProtocol(asyncio.Protocol):
-	state = "Initial_SYN_State"
+	state = "Initial_SYN_State_0"
 	def __init__(self, loop):
 		if __name__ =="__main__":
 			print("Client Side: Init Compelete...")
 		self.loop = loop
 		self._deserializer = PacketType.Deserializer()
 		self.transport = None
-		self.state = "Initial_SYN_State"
+		self.state = "Initial_SYN_State_0"
 
 	def connection_made(self, transport):
 		if __name__ =="__main__":
@@ -27,7 +27,7 @@ class ClientProtocol(asyncio.Protocol):
 
 	def send_request_packet(self, callback=None):
 		#print("Client: %s"%self.state)
-		if self.state != "Initial_SYN_State":
+		if self.state != "Initial_SYN_State_0":
 			if __name__ =="__main__":
 				print("Client Side: Error: State Error! Expecting Initial_SYN_State but getting %s"%self.state)
 			self.state = "error_state"
@@ -40,7 +40,7 @@ class ClientProtocol(asyncio.Protocol):
 			if __name__ =="__main__":
 				print("Client Side: SYN sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber,outBoundPacket.Acknowledgement))
 			packetBytes = outBoundPacket.__serialize__()
-			self.state = "SYN_ACK_State"
+			self.state = "SYN_ACK_State_1"
 			self.transport.write(packetBytes)
 
 	def connection_lost(self, exc=None):
@@ -66,7 +66,7 @@ class ClientProtocol(asyncio.Protocol):
 					print("Client side: checksum is good")
 				
 				if packet.Type == 1:	# incoming an SYN-ACK handshake packet
-					if self.state != "SYN_ACK_State":
+					if self.state != "SYN_ACK_State_1":
 						if __name__ =="__main__":
 							print("Client Side: Error: State Error! Expecting SYN_ACK_State but getting %s"%self.state)
 						self.state = "error_state"
@@ -77,7 +77,7 @@ class ClientProtocol(asyncio.Protocol):
 							print("Client Side: SYN-ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Client Side: ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
 						packetBytes = outBoundPacket.__serialize__()
-						self.state = "Transmission_State"
+						self.state = "Transmission_State_2"
 						self.transport.write(packetBytes)
 				else:
 					if __name__ =="__main__":

@@ -79,8 +79,8 @@ def basicUnitTestForProtocol():
 
 	MockPEEPPacket_SYN = Util.create_outbound_packet(0, 1, 1, b"data")
 	packetBytes = MockPEEPPacket_SYN.__serialize__()
-	server.state = "SYN_State"
-	client.state = "SYN_ACK_State"
+	server.state = "SYN_State_1"
+	client.state = "SYN_ACK_State_1"
 	server.data_received(packetBytes)
 	assert server.state == "error_state"
 	print("- negative test for messing up packet order SUCCESS")
@@ -93,11 +93,11 @@ def basicUnitTestForProtocol():
 
 	MockPEEPPacket_ACK = Util.create_outbound_packet(2, 1, 1, b"data")
 	packetBytes = MockPEEPPacket_ACK.__serialize__()
-	server.state = "SYN_State"
-	client.state = "Transmission_State"
+	server.state = "SYN_State_1"
+	client.state = "Transmission_State_2"
 	server.data_received(packetBytes)
-	assert server.state == "Transmission_State"
-	assert client.state == "Transmission_State"
+	assert server.state == "Transmission_State_2"
+	assert client.state == "Transmission_State_2"
 	print("- test for client vericifation result SUCCESS")
 	print ("")
 
