@@ -35,10 +35,9 @@ class ClientProtocol(asyncio.Protocol):
 			self.loop.stop()
 		else:
 			self._callback = callback
-			outBoundPacket = Util.create_outbound_packet(0, random.randint(0, 2147483646/2), 0)
-
+			outBoundPacket = Util.create_outbound_packet(0, random.randint(0, 2147483646/2))
 			if __name__ =="__main__":
-				print("Client Side: SYN sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber,outBoundPacket.Acknowledgement))
+				print("Client Side: SYN sent: Seq = %d"%(outBoundPacket.SequenceNumber))
 			packetBytes = outBoundPacket.__serialize__()
 			self.state = "SYN_ACK_State_1"
 			self.transport.write(packetBytes)

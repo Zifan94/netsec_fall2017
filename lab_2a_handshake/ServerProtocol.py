@@ -56,7 +56,7 @@ class ServerProtocol(asyncio.Protocol):
 						outBoundPacket = Util.create_outbound_packet(1, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
 
 						if __name__ =="__main__":
-							print("Server Side: SYN reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
+							print("Server Side: SYN reveived: Seq = %d"%(packet.SequenceNumber))
 							print("Server Side: SYN-ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
 						packetBytes = outBoundPacket.__serialize__()
 						self.state = "SYN_State_1"
