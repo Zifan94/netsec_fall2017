@@ -25,6 +25,13 @@ class ClientProtocol(asyncio.Protocol):
 			print("Client Side: Connection Made...")
 		self.transport = transport
 
+	def timeout_checker(self):
+		if self.state == "SYN_ACK_State_1":
+			print("Time-out. Close Connection.")
+			self.state = "error_state"
+			self.transport.close()
+			self.loop.stop()		
+		
 	def send_request_packet(self, callback=None):
 		#print("Client: %s"%self.state)
 		if self.state != "Initial_SYN_State_0":
@@ -41,6 +48,8 @@ class ClientProtocol(asyncio.Protocol):
 			packetBytes = outBoundPacket.__serialize__()
 			self.state = "SYN_ACK_State_1"
 			self.transport.write(packetBytes)
+			current_time = asyncio.get_event_loop().time()
+			asyncio.get_event_loop().call_at(current_time + self.TIMEOUTLIMIT, self.timeout_checker)
 
 	def connection_lost(self, exc=None):
 		self.transport = None
