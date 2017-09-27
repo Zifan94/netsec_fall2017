@@ -12,6 +12,8 @@ import asyncio
 
 class ClientProtocol(asyncio.Protocol):
 	state = "Initial_SYN_State_0"
+	TIMEOUTLIMIT = 1
+	
 	def __init__(self, loop):
 		if __name__ =="__main__":
 			print("Client Side: Init Compelete...")
@@ -27,7 +29,8 @@ class ClientProtocol(asyncio.Protocol):
 
 	def timeout_checker(self):
 		if self.state == "SYN_ACK_State_1":
-			print("Time-out. Close Connection.")
+			if __name__ == "__main__":
+				print("Client Side: Time-out. Close Connection.")
 			self.state = "error_state"
 			self.transport.close()
 			self.loop.stop()		
