@@ -40,10 +40,12 @@ class ServerProtocol(asyncio.Protocol):
 
 			#Do checksum verification first!
 			if (Util.hasValidChecksum(packet) == 0): 
-				print("Server side: checksum is bad")
+				if __name__ =="__main__":
+					print("Server side: checksum is bad")
 				self.state = "error_state"
 			else: # checksum is good, now we look into the packet
-				print("Server side: checksum is good")
+				if __name__ =="__main__":
+					print("Server side: checksum is good")
 				
 				if packet.Type == 0:	# incoming an SYN handshake packet
 					if self.state != "SYN_ACK_State_0":
@@ -51,7 +53,7 @@ class ServerProtocol(asyncio.Protocol):
 							print("Server Side: Error: State Error! Expecting SYN_ACK_State but getting %s"%self.state)
 						self.state = "error_state"
 					else:
-						outBoundPacket = Util.create_outbound_handshake_packet(1, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
+						outBoundPacket = Util.create_outbound_packet(1, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
 
 						if __name__ =="__main__":
 							print("Server Side: SYN reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
@@ -70,7 +72,7 @@ class ServerProtocol(asyncio.Protocol):
 						if __name__ =="__main__":
 							print("Server Side: ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 							print("Server Side: CONNECTION ESTABLISHED!")
-						self.state = "Tramsmission_State_2"
+						self.state = "Transmission_State_2"
 
 			if self.transport == None:
 				continue

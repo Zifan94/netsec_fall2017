@@ -35,7 +35,7 @@ class ClientProtocol(asyncio.Protocol):
 			self.loop.stop()
 		else:
 			self._callback = callback
-			outBoundPacket = Util.create_outbound_handshake_packet(0, random.randint(0, 2147483646/2), 0)
+			outBoundPacket = Util.create_outbound_packet(0, random.randint(0, 2147483646/2), 0)
 
 			if __name__ =="__main__":
 				print("Client Side: SYN sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber,outBoundPacket.Acknowledgement))
@@ -58,10 +58,12 @@ class ClientProtocol(asyncio.Protocol):
 
 			 #Do checksum verification first!
 			if (Util.hasValidChecksum(packet) == 0):
-				print("Client side: checksum is bad")
+				if __name__ =="__main__":
+					print("Client side: checksum is bad")
 				self.state = "error_state"
 			else:  # checksum is good, now we look into the packet
-				print("Client side: checksum is good")
+				if __name__ =="__main__":
+					print("Client side: checksum is good")
 				
 				if packet.Type == 1:	# incoming an SYN-ACK handshake packet
 					if self.state != "SYN_ACK_State_1":
@@ -69,7 +71,7 @@ class ClientProtocol(asyncio.Protocol):
 							print("Client Side: Error: State Error! Expecting SYN_ACK_State but getting %s"%self.state)
 						self.state = "error_state"
 					else:
-						outBoundPacket = Util.create_outbound_handshake_packet(2, packet.Acknowledgement+1, packet.SequenceNumber+1)
+						outBoundPacket = Util.create_outbound_packet(2, packet.Acknowledgement+1, packet.SequenceNumber+1)
 
 						if __name__ =="__main__":
 							print("Client Side: SYN-ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
