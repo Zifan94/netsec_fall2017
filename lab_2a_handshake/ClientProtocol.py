@@ -86,6 +86,7 @@ class ClientProtocol(StackingProtocol):
 
 						print("PEEP Client Side: SYN-ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
 						print("PEEP Client Side: ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
+
 						packetBytes = outBoundPacket.__serialize__()
 						self.state = "Transmission_State_2"
 						self.transport.write(packetBytes)
