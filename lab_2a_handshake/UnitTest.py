@@ -63,11 +63,14 @@ def basicUnitTestForProtocol():
 
 	server = ServerProtocol(loop)
 	client = ClientProtocol(loop)
+
+	client.set_timeout_flag(False)
 	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
 
 	# test for general connection_made
 	client.connection_made(cTransport)
 	server.connection_made(sTransport)
+	
 	print("- test for general connection_made SUCCESS")
 	print ("")
 
