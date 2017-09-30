@@ -13,30 +13,31 @@ import asyncio
 
 class VerificationCodeClientProtocol(asyncio.Protocol):
 	state = "initial_state"
-	def __init__(self, ID, loop):
-		if __name__ =="__main__":
+	def __init__(self, ID, loop, logging=True):
+		if logging:
 			print("App_Layer Client Side: Init Compelete...")
 		self.loop = loop
 		self._deserializer = PacketType.Deserializer()
 		self.transport = None
 		self.state = "initial_state"
 		self.message = ID
+		self.logging = logging
 
 	def connection_made(self, transport):
-		if __name__ =="__main__":
+		if self.logging:
 			print("App_Layer Client Side: Connection Made...")
 		self.transport = transport
 
 	def send_request_packet(self, callback=None):
 		#print("Client: %s"%self.state)
-		if self.state != "initial_state":
+		if self.logging:
 			if __name__ =="__main__":
 				print("App_Layer Client Side: Error: State Error! Expecting initial_state but getting %s"%self.state)
 			self.state = "error_state"
 			self.transport.close()
 			self.loop.stop()
 		else:
-			if __name__ =="__main__":
+			if self.logging:
 				print("App_Layer Client Side: Sending first packet...")
 			self._callback = callback
 			outBoundPacket = RequestPacket()
@@ -47,7 +48,7 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 
 	def connection_lost(self, exc=None):
 		self.transport = None
-		if __name__ =="__main__":
+		if self.logging:
 			print("App_Layer Client Side: Connection Lost...")
 		self.loop.stop()
 
@@ -58,19 +59,19 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 				# self.loop.stop()
 				continue
 			# if self.state == "error_state":
-			# 	# self.transport.close() #using pass through ptl to close 
+			# 	# self.transport.close() #using pass through ptl to close
 			# 	self.transport = None
 			if isinstance(packet, VerificationCodePacket):
 				#print("Client: %s"%self.state)
 				if self.state != "wait_for_verification_code_packet":
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Client Side: Error: State Error! Expecting wait_for_verification_code_packet but getting %s"%self.state)
 					self.state = "error_state"
 					#self.loop.stop()
 				else:
 					outBoundPacket = VerifyPacket()
 					outBoundPacket.ID = packet.ID
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Client Side: The Verification Code received from Server is: %d..."%packet.originalVerificationCode)
 					# outBoundPacket.answer = input("Client Side: Please input the verification code: ")
 					if self._callback == None:
@@ -84,12 +85,12 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 			elif isinstance(packet, ResultPacket):
 				#print("Client: %s"%self.state)
 				if self.state != "wait_for_result_packet":
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Client Side: Error: State Error! Expecting wait_for_result_packet but getting %s"%self.state)
 					self.state = "error_state"
 					#self.loop.stop()
 				else:
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Client Side: The Result of Verification is:")
 						if packet.passfail == 'pass':
 							print("")
@@ -118,25 +119,25 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 					outBoundPacket.hangup = True
 					packetBytes = outBoundPacket.__serialize__()
 					self.state = "finish_state"
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Client Side: Sent Hang up signal!")
 					self.transport.write(packetBytes)
 			else:
 				#print("Client: %s"%self.state)
-				if __name__ =="__main__":
+				if self.logging:
 					print("App_Layer Client Side: Error: Unexpected data received!")
 				self.state = "error_state"
 			if self.transport == None:
 				#self.loop.stop()
 				continue
 			# if self.state == "error_state":
-			# 	# self.transport.close() #using pass through ptl to close 
+			# 	# self.transport.close() #using pass through ptl to close
 			# 	self.transport = None
 
 
 
 
-	
+
 
 	def callbackForUserVCInput(self):
 		answer = input("App_Layer Client Side: Please input the verification code: ")
@@ -154,7 +155,7 @@ if __name__ =="__main__":
 	print("----- NEW CONNECTOR SETUP on Client Side-----")
 
 	#coro = loop.create_connection(lambda: VerificationCodeClientProtocol(1, loop), host="127.0.0.1", port=8000)
-	coro = playground.getConnector('passthroughClient').create_playground_connection(lambda: VerificationCodeClientProtocol(1, loop), "20174.1.1.1", 101)	
+	coro = playground.getConnector('passthroughClient').create_playground_connection(lambda: VerificationCodeClientProtocol(1, loop), "20174.1.1.1", 101)
 	transport, protocol = loop.run_until_complete(coro)
 	protocol.send_request_packet(protocol.callbackForUserVCInput)
 	# protocol.send_request_packet()
