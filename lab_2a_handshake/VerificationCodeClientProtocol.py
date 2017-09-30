@@ -30,8 +30,8 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 
 	def send_request_packet(self, callback=None):
 		#print("Client: %s"%self.state)
-		if self.logging:
-			if __name__ =="__main__":
+		if self.state != "initial_state":
+			if self.logging:
 				print("App_Layer Client Side: Error: State Error! Expecting initial_state but getting %s"%self.state)
 			self.state = "error_state"
 			self.transport.close()
