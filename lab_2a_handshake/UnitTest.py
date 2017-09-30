@@ -66,8 +66,8 @@ def basicUnitTestForPEEPProtocol(loggingFlag):
 	asyncio.set_event_loop(TestLoopEx())
 	loop = asyncio.get_event_loop()
 
-	server = ServerProtocol(loop)
-	client = ClientProtocol(loop)
+	server = ServerProtocol(loop, False)
+	client = ClientProtocol(loop, False)
 
 	client.set_timeout_flag(False)
 	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
@@ -239,8 +239,8 @@ def basicUnitTestForAppLayerProtocol(loggingFlag):
 	asyncio.set_event_loop(TestLoopEx())
 	loop = asyncio.get_event_loop()
 
-	server = VerificationCodeServerProtocol(loop)
-	client = VerificationCodeClientProtocol(1, loop)
+	server = VerificationCodeServerProtocol(loop, False)
+	client = VerificationCodeClientProtocol(1, loop, False)
 	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
 
 	# test for general connection_made 
