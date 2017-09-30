@@ -13,8 +13,8 @@ import asyncio
 
 class VerificationCodeServerProtocol(asyncio.Protocol):
 	state = "wait_for_request_packet"
-	def __init__(self, loop):
-		if __name__ =="__main__":
+	def __init__(self, loop, logging=True):
+		if logging:
 			print("App_Layer Server Side: Init Compelete...")
 		self.loop = loop
 		self._deserializer = PacketType.Deserializer()
@@ -22,15 +22,16 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 		self.state = "wait_for_request_packet"
 		self._result = "null"
 		self._verificationCode = 1
+		self.logging = logging
 
 	def connection_made(self, transport):
-		if __name__ =="__main__":
+		if self.logging:
 			print("App_Layer Server Side: Connection Made...")
 		self.transport = transport
 
 	def connection_lost(self, exc=None):
 		self.transport = None
-		if __name__ =="__main__":
+		if self.logging:
 			print("App_Layer Server Side: Connection Lost...")
 		self.loop.stop()
 
@@ -41,12 +42,12 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 				#self.loop.stop()
 				continue
 			# if self.state == "error_state":
-			# 	# self.transport.close() #using pass through ptl to close 
+			# 	# self.transport.close() #using pass through ptl to close
 			# 	self.transport = None
 			if isinstance(packet, RequestPacket):
 				#print("Server: %s"%self.state)
 				if self.state != "wait_for_request_packet":
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Server Side: Error: State Error! Expecting wait_for_request_packet but getting %s"%self.state)
 					self.state = "error_state"
 					#self.loop.stop()
@@ -55,7 +56,7 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 					outBoundPacket.ID = packet.ID
 					self._verificationCode = random.randint(100000, 999999)
 					outBoundPacket.originalVerificationCode = self._verificationCode
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Server Side: Sending Verification Code is: %d..."%outBoundPacket.originalVerificationCode)
 					packetBytes = outBoundPacket.__serialize__()
 					self.state = "wait_for_verify_packet"
@@ -63,23 +64,23 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 			elif isinstance(packet, VerifyPacket):
 				#print("Server: %s"%self.state)
 				if self.state != "wait_for_verify_packet":
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Server Side: Error: State Error! Expecting wait_for_verify_packet but getting %s"%self.state)
 					self.state = "error_state"
 					#self.loop.stop()
 				else:
 					outBoundPacket = ResultPacket()
 					outBoundPacket.ID = packet.ID
-					if packet.answer == self._verificationCode:	
+					if packet.answer == self._verificationCode:
 						outBoundPacket.passfail = "pass"
 						self._result = "pass"
-					else:	
+					else:
 						outBoundPacket.passfail = "fail"
 						self._result = "fail"
 					packetBytes = outBoundPacket.__serialize__()
 					self.state = "wait_for_hangup_packet"
 					self.transport.write(packetBytes)
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Server Side: The Verification Result is:")
 						if outBoundPacket.passfail == 'pass':
 							print("")
@@ -111,23 +112,23 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 					self.state = "error_state"
 					#self.loop.stop()
 				else:
-					if __name__ =="__main__":
+					if self.logging:
 						print("App_Layer Server Side: Hang up signal received, preparing to close!")
 					self.state = "close_state"
 			else:
 				#print("Server: %s"%self.state)
-				if __name__ =="__main__":
+				if self.logging:
 					print("App_Layer Server Side: Error: Unexpected data received!")
 				self.state = "error_state"
 			if self.transport == None:
 				#self.loop.stop()
 				continue
 			# if self.state == "error_state" or self.state == "close_state":
-			# 	# self.transport.close() #using pass through ptl to close 
+			# 	# self.transport.close() #using pass through ptl to close
 			# 	self.transport = None
 
-		
-			
+
+
 
 if __name__ =="__main__":
 	# f = StackingProtocolFactory(lambda: PassThroughServerProtocol(), lambda: PassThroughClientProtocol())
@@ -149,7 +150,7 @@ if __name__ =="__main__":
 		loop.run_forever()
 	except KeyboardInterrupt:
 		pass
-	
+
 	#server.close()
 	#loop.run_until_complete(server.wait_closed())
 	loop.close()
