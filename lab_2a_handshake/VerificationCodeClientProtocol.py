@@ -148,14 +148,16 @@ if __name__ =="__main__":
 	loop = asyncio.get_event_loop()
 	loop.set_debug(enabled = True)
 
-	f = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ClientProtocol(loop))
-	# f = StackingProtocolFactory(lambda: ClientProtocol(loop), lambda: PassThroughProtocol1())
-	ptConnector = playground.Connector(protocolStack=f)
-	playground.setConnector("passthroughClient", ptConnector)
+	####### this part should be put into __init__.py ############
+	cf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ClientProtocol())
+	sf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ServerProtocol())
+	lab2Connector = playground.Connector(protocolStack=(cf, sf))
+	playground.setConnector("lab2_protocol", lab2Connector)
+	#############################################################
+
 	print("----- NEW CONNECTOR SETUP on Client Side-----")
 
-	#coro = loop.create_connection(lambda: VerificationCodeClientProtocol(1, loop), host="127.0.0.1", port=8000)
-	coro = playground.getConnector('passthroughClient').create_playground_connection(lambda: VerificationCodeClientProtocol(1, loop), "20174.1.1.1", 101)
+	coro = playground.getConnector('lab2_protocol').create_playground_connection(lambda: VerificationCodeClientProtocol(1, loop), "20174.1.1.1", 101)
 	transport, protocol = loop.run_until_complete(coro)
 	protocol.send_request_packet(protocol.callbackForUserVCInput)
 	# protocol.send_request_packet()

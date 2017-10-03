@@ -15,10 +15,9 @@ class ClientProtocol(StackingProtocol):
 	TIMEOUTLIMIT = 10
 	timeout_flag = True
 
-	def __init__(self, loop, logging=True):
+	def __init__(self, logging=True):
 		if logging:
 			print("PEEP Client Side: Init Compelete...")
-		self.loop = loop
 		self._deserializer = PacketType.Deserializer()
 		super().__init__
 		self.transport = None
@@ -37,7 +36,6 @@ class ClientProtocol(StackingProtocol):
 				print("PEEP Client Side: Time-out. Close Connection.")
 			self.state = "error_state"
 			self.transport.close()
-			self.loop.stop()
 
 	def set_timeout_flag(self, flag): #Only used in UnitTest to turn off timeout_flag
 		self.timeout_flag = flag
@@ -51,7 +49,6 @@ class ClientProtocol(StackingProtocol):
 				print("PEEP Client Side: Error: State Error! Expecting Initial_SYN_State but getting %s"%self.state)
 			self.state = "error_state"
 			self.transport.close()
-			self.loop.stop()
 		else:
 			self._callback = callback
 			outBoundPacket = Util.create_outbound_packet(0, random.randint(0, 2147483646/2))
@@ -69,7 +66,6 @@ class ClientProtocol(StackingProtocol):
 		self.transport = None
 		if self.logging:
 			print("PEEP Client Side: Connection Lost...")
-		self.loop.stop()
 
 	def data_received(self, data):
 		self._deserializer.update(data)
@@ -116,7 +112,6 @@ class ClientProtocol(StackingProtocol):
 				continue
 			if self.state == "error_state":
 				self.transport.close()
-				self.loop.stop()
 
 
 

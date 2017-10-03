@@ -131,19 +131,20 @@ class VerificationCodeServerProtocol(asyncio.Protocol):
 
 
 if __name__ =="__main__":
-	# f = StackingProtocolFactory(lambda: PassThroughServerProtocol(), lambda: PassThroughClientProtocol())
-	# ptConnector = playground.Connector(protocolStack=f)
-	# playground.setConnector("passthrough", ptConnector)
+	
 	loop = asyncio.get_event_loop()
 	loop.set_debug(enabled = True)
 
-	f = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ServerProtocol(loop))
-	# f = StackingProtocolFactory(lambda: ServerProtocol(loop), lambda: PassThroughProtocol1())
-	ptConnector = playground.Connector(protocolStack=f)
-	playground.setConnector("passthroughServer", ptConnector)
+	####### this part should be put into __init__.py ############
+	cf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ClientProtocol())
+	sf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ServerProtocol())
+	lab2Connector = playground.Connector(protocolStack=(cf, sf))
+	playground.setConnector("lab2_protocol", lab2Connector)
+	#############################################################
+
 	print("----- NEW CONNECTOR SETUP on Serve Side-----")
 
-	coro = playground.getConnector('passthroughServer').create_playground_server(lambda: VerificationCodeServerProtocol(loop), 101)
+	coro = playground.getConnector('lab2_protocol').create_playground_server(lambda: VerificationCodeServerProtocol(loop), 101)
 
 	server = loop.run_until_complete(coro)
 	try:
