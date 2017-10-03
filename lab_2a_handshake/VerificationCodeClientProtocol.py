@@ -150,10 +150,10 @@ if __name__ =="__main__":
 	loop.set_debug(enabled = True)
 
 	####### this part should be put into __init__.py ############
-	cf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ClientProtocol())
-	sf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ServerProtocol())
-	lab2Connector = playground.Connector(protocolStack=(cf, sf))
-	playground.setConnector("lab2_protocol", lab2Connector)
+	# cf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ClientProtocol())
+	# sf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ServerProtocol())
+	# lab2Connector = playground.Connector(protocolStack=(cf, sf))
+	# playground.setConnector("lab2_protocol", lab2Connector)
 	#############################################################
 
 	print("----- NEW CONNECTOR SETUP on Client Side-----")
