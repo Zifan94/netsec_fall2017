@@ -3,6 +3,7 @@ from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER, BOOL
 from MyPacket import *
 from PassThroughProtocol import *
 from ServerProtocol import *
+from ClientProtocol import *
 from playground.network.common import StackingProtocol, StackingTransport, StackingProtocolFactory
 
 import playground
