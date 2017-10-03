@@ -53,7 +53,7 @@ class ClientProtocol(StackingProtocol):
 			self._callback = callback
 			outBoundPacket = Util.create_outbound_packet(0, random.randint(0, 2147483646/2))
 			if self.logging:
-				print("PEEP Client Side: SYN sent: Seq = %d"%(outBoundPacket.SequenceNumber))
+				print("PEEP Client Side: SYN sent: Seq = %d, Checksum = (%d)"%(outBoundPacket.SequenceNumber, outBoundPacket.Checksum))
 			packetBytes = outBoundPacket.__serialize__()
 			self.state = "SYN_ACK_State_1"
 			self.transport.write(packetBytes)
@@ -76,7 +76,7 @@ class ClientProtocol(StackingProtocol):
 				continue
 
 			 #Do checksum verification first!
-			if (Util.hasValidChecksum(packet) == 0):
+			if (packet.verifyChecksum() == False):
 				if self.logging:
 					print("PEEP Client side: checksum is bad")
 				self.state = "error_state"
@@ -92,8 +92,8 @@ class ClientProtocol(StackingProtocol):
 					else:
 						outBoundPacket = Util.create_outbound_packet(2, packet.Acknowledgement+1, packet.SequenceNumber+1)
 						if self.logging:
-							print("PEEP Client Side: SYN-ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
-							print("PEEP Client Side: ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
+							print("PEEP Client Side: SYN-ACK reveived: Seq = %d, Ack = %d, Checksum = (%d)"%(packet.SequenceNumber,packet.Acknowledgement, packet.Checksum))
+							print("PEEP Client Side: ACK sent: Seq = %d, Ack = %d, Checksum = (%d)"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement, outBoundPacket.Checksum))
 
 						packetBytes = outBoundPacket.__serialize__()
 						self.state = "Transmission_State_2"

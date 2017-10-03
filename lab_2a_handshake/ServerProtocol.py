@@ -39,7 +39,7 @@ class ServerProtocol(StackingProtocol):
 				continue
 
 			#Do checksum verification first!
-			if (Util.hasValidChecksum(packet) == 0):
+			if (packet.verifyChecksum() == False):
 				if self.logging:
 					print("PEEP Server side: checksum is bad")
 				self.state = "error_state"
@@ -55,8 +55,8 @@ class ServerProtocol(StackingProtocol):
 					else:
 						outBoundPacket = Util.create_outbound_packet(1, random.randint(0, 2147483646/2), packet.SequenceNumber+1)
 						if self.logging:
-							print("PEEP Server Side: SYN reveived: Seq = %d"%(packet.SequenceNumber))
-							print("PEEP Server Side: SYN-ACK sent: Seq = %d, Ack = %d"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement))
+							print("PEEP Server Side: SYN reveived: Seq = %d, Checksum = (%d)"%(packet.SequenceNumber, packet.Checksum))
+							print("PEEP Server Side: SYN-ACK sent: Seq = %d, Ack = %d, Checksum = (%d)"%(outBoundPacket.SequenceNumber, outBoundPacket.Acknowledgement, outBoundPacket.Checksum))
 						packetBytes = outBoundPacket.__serialize__()
 						self.state = "SYN_State_1"
 						self.transport.write(packetBytes)
@@ -68,7 +68,7 @@ class ServerProtocol(StackingProtocol):
 						self.state = "error_state"
 					else:
 						if self.logging:
-							print("PEEP Server Side: ACK reveived: Seq = %d, Ack = %d"%(packet.SequenceNumber,packet.Acknowledgement))
+							print("PEEP Server Side: ACK reveived: Seq = %d, Ack = %d, Checksum = (%d)"%(packet.SequenceNumber,packet.Acknowledgement, packet.Checksum))
 							print("PEEP Server Side: CONNECTION ESTABLISHED!")
 						self.state = "Transmission_State_2"
 						if self.logging:
