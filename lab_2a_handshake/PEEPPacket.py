@@ -1,6 +1,7 @@
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
 from playground.network.packet.fieldtypes.attributes import *
+import zlib
 
 class PEEPPacket(PacketType):
 	DEFINITION_IDENTIFIER = "PEEP.Packet"
@@ -14,6 +15,18 @@ class PEEPPacket(PacketType):
 		("Data", BUFFER({Optional: True}))
 	]
 
+	def calculateChecksum(self):
+		oldChecksum = self.Checksum
+		self.Checksum = 0
+		bytes = self.__serialize__()
+		self.Checksum = oldChecksum
+		return zlib.adler32(bytes) & 0xffff
+
+	def updateChecksum(self):
+		self.Checksum = self.calculateChecksum()
+
+	def verifyChecksum(self):
+		return self.Checksum == self.calculateChecksum()
 	# SYN -		TYPE 0
 	# SYN-ACK -  TYPE 1
 	# ACK - 		TYPE 2
