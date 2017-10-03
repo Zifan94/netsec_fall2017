@@ -66,8 +66,8 @@ def basicUnitTestForPEEPProtocol(loggingFlag):
 	asyncio.set_event_loop(TestLoopEx())
 	loop = asyncio.get_event_loop()
 
-	server = ServerProtocol(loop, False)
-	client = ClientProtocol(loop, False)
+	server = ServerProtocol(False)
+	client = ClientProtocol(False)
 
 	client.set_timeout_flag(False)
 	cTransport, sTransport = MockTransportToProtocol.CreateTransportPair(client, server)
