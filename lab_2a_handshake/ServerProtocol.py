@@ -12,10 +12,9 @@ import asyncio
 
 class ServerProtocol(StackingProtocol):
 	state = "SYN_ACK_State_0"
-	def __init__(self, loop, logging=True):
+	def __init__(self, logging=True):
 		if logging:
 			print("PEEP Server Side: Init Compelete...")
-		self.loop = loop
 		self._deserializer = PacketType.Deserializer()
 		super().__init__
 		self.transport = None
@@ -31,7 +30,6 @@ class ServerProtocol(StackingProtocol):
 		self.transport = None
 		if self.logging:
 			print("PEEP Server Side: Connection Lost...")
-		self.loop.stop()
 
 	def data_received(self, data):
 		self._deserializer.update(data)
@@ -83,7 +81,6 @@ class ServerProtocol(StackingProtocol):
 				continue
 			if self.state == "error_state":
 				self.transport.close()
-				self.loop.stop()
 
 
 
