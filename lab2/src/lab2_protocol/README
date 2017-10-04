@@ -1,6 +1,7 @@
 TEAM: WHOAMI
 TEAM MEMBER: Bowen Shi(Leader), Ying Liu, Zifan Yang, Evan Hsia
 
+===============================================================================
 
 PEEPClientProtocol.py is our lab2 PEEP Client Side Protocol  (Transport Layer)
 PEEPServerProtocol.py is our lab2 PEEP Server Side Protocol  (Transport Layer)
@@ -16,3 +17,8 @@ Util.py is some static method we used in our PEEP Protocol
 
 
 UnitTest.py is the unit test for all the files above.
+
+===============================================================================
+
+How to run it:
+Run "python VerificationCodeServerProtocol.py" in one terminal and Run "python VerificationCodeClientProtocol.py" in another terminal
