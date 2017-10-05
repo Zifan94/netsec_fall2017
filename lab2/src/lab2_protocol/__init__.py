@@ -1,3 +1,3 @@
 from .PassThroughProtocol import PassThroughProtocol1
-from .ClientProtocol import ClientProtocol
-from .ServerProtocol import ServerProtocol
+from .PEEPClientProtocol import PEEPClientProtocol
+from .PEEPServerProtocol import PEEPServerProtocol

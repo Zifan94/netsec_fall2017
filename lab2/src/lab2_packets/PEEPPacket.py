@@ -1,6 +1,7 @@
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
 from playground.network.packet.fieldtypes.attributes import *
+import zlib
 
 
 class PEEPPacket(PacketType):

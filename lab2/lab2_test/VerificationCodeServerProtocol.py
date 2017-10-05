@@ -1,9 +1,9 @@
 # import sys
-# sys.path.append('~/NETWORK/netsec_fall2017')
+# sys.path.append('~/NETWORK/netsec_fall2017/lab2')
 # print(sys.path)
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER, BOOL
-from ..src.la2_packets import *
+from ..src.lab2_packets import *
 from playground.network.common import StackingProtocol, StackingTransport, StackingProtocolFactory
 
 import playground
