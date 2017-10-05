@@ -1,6 +1,9 @@
+# import sys
+# sys.path.append('~/NETWORK/netsec_fall2017')
+# print(sys.path)
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER, BOOL
-from MyPacket import *
+from ..src.la2_packets import *
 from playground.network.common import StackingProtocol, StackingTransport, StackingProtocolFactory
 
 import playground
@@ -133,13 +136,6 @@ if __name__ =="__main__":
 	loop = asyncio.get_event_loop()
 	loop.set_debug(enabled = True)
 
-	####### this part should be put into __init__.py ############
-	# cf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ClientProtocol())
-	# sf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ServerProtocol())
-	# lab2Connector = playground.Connector(protocolStack=(cf, sf))
-	# playground.setConnector("lab2_protocol", lab2Connector)
-	#############################################################
-
 	print("----- NEW CONNECTOR SETUP on Serve Side-----")
 
 	coro = playground.getConnector('lab2_protocol').create_playground_server(lambda: VerificationCodeServerProtocol(loop), 101)
@@ -150,6 +146,4 @@ if __name__ =="__main__":
 	except KeyboardInterrupt:
 		pass
 
-	#server.close()
-	#loop.run_until_complete(server.wait_closed())
 	loop.close()

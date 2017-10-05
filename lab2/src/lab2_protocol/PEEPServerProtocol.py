@@ -1,7 +1,7 @@
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
-from PEEPPacket import *
-from Util import *
+from ..lab2_packets import *
+from ..lab2_Util import *
 from playground.network.common import StackingProtocol, StackingTransport, StackingProtocolFactory
 
 import playground
@@ -81,17 +81,3 @@ class PEEPServerProtocol(StackingProtocol):
 				continue
 			if self.state == "error_state":
 				self.transport.close()
-
-
-
-
-# if __name__ =="__main__":
-# 	loop = asyncio.get_event_loop()
-# 	coro = playground.getConnector().create_playground_server(lambda: ServerProtocol(loop), 101)
-# 	server = loop.run_until_complete(coro)
-# 	try:
-# 		loop.run_forever()
-# 	except KeyboardInterrupt:
-# 		pass
-
-# 	loop.close()

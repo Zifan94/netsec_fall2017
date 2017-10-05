@@ -1,6 +1,6 @@
 from playground.network.packet import PacketType
 from playground.network.common import StackingProtocol, StackingTransport, StackingProtocolFactory
-from MyPacket import *
+from ..lab2_packets import *
 import playground
 
 class PassThroughProtocol1(StackingProtocol):

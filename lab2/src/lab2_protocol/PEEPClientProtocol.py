@@ -1,7 +1,7 @@
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
-from PEEPPacket import *
-from Util import *
+from ..lab2_packets import *
+from ..lab2_Util import *
 from playground.network.common import StackingProtocol, StackingTransport, StackingProtocolFactory
 
 import playground
@@ -114,18 +114,6 @@ class PEEPClientProtocol(StackingProtocol):
 				self.transport.close()
 
 
-
-
-
-
 	def callbackForUserVCInput(self):
 		answer = input("Client Side: Please input the verification code: ")
 		return answer
-
-# if __name__ =="__main__":
-# 	loop = asyncio.get_event_loop()
-# 	coro = playground.getConnector().create_playground_connection(lambda: ClientProtocol(loop), "20174.1.1.1", 101)
-# 	transport, protocol = loop.run_until_complete(coro)
-# 	protocol.send_request_packet()
-# 	loop.run_forever()
-# 	loop.close()

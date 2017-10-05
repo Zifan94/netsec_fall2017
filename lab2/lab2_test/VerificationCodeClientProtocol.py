@@ -1,8 +1,8 @@
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, STRING, BUFFER, BOOL
-from MyPacket import *
+from ..src.la2_packets import *
 from playground.network.common import StackingProtocol, StackingTransport, StackingProtocolFactory
-
+from playground.common import logging as p_logging
 import playground
 
 import random
@@ -142,22 +142,15 @@ class VerificationCodeClientProtocol(asyncio.Protocol):
 		return answer
 
 if __name__ =="__main__":
-
+	p_logging.EnablePresetLogging(p_logging.PRESET_TEST)
 	loop = asyncio.get_event_loop()
 	loop.set_debug(enabled = True)
 
-	####### this part should be put into __init__.py ############
-	# cf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ClientProtocol())
-	# sf = StackingProtocolFactory(lambda: PassThroughProtocol1(), lambda: ServerProtocol())
-	# lab2Connector = playground.Connector(protocolStack=(cf, sf))
-	# playground.setConnector("lab2_protocol", lab2Connector)
-	#############################################################
 
 	print("----- NEW CONNECTOR SETUP on Client Side-----")
 
 	coro = playground.getConnector('lab2_protocol').create_playground_connection(lambda: VerificationCodeClientProtocol(1, loop), "20174.1.1.1", 101)
 	transport, protocol = loop.run_until_complete(coro)
 	protocol.send_request_packet(protocol.callbackForUserVCInput)
-	# protocol.send_request_packet()
 	loop.run_forever()
 	loop.close()

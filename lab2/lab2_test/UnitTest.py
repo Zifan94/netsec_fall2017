@@ -1,13 +1,13 @@
 from playground.network.packet import PacketType
 from playground.network.packet.fieldtypes import UINT32, UINT16, UINT8, STRING, BUFFER, BOOL
 from playground.network.packet.fieldtypes.attributes import *
-from PEEPPacket import *
-from MyPacket import *
-from VerificationCodeServerProtocol import VerificationCodeServerProtocol
-from VerificationCodeClientProtocol import VerificationCodeClientProtocol
-from Util import *
-from PEEPServerProtocol import PEEPServerProtocol
-from PEEPClientProtocol import PEEPClientProtocol
+from .PEEPPacket import *
+from .MyPacket import *
+from .VerificationCodeServerProtocol import VerificationCodeServerProtocol
+from .VerificationCodeClientProtocol import VerificationCodeClientProtocol
+from .Util import *
+from .PEEPServerProtocol import PEEPServerProtocol
+from .PEEPClientProtocol import PEEPClientProtocol
 from playground.asyncio_lib.testing import TestLoopEx
 from playground.network.testing import MockTransportToStorageStream as MockTransport
 from playground.network.testing import MockTransportToProtocol
