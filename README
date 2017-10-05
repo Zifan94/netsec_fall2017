@@ -19,6 +19,11 @@ Util.py is some static method we used in our PEEP Protocol
 UnitTest.py is the unit test for all the files above.
 
 ===============================================================================
-
-How to run it:
-Run "python VerificationCodeServerProtocol.py" in one terminal and Run "python VerificationCodeClientProtocol.py" in another terminal
+### ./start.sh  is equal to bash start.sh ###
+How to run it in terminal:
+1. UnitTesttest
+    `bash start.sh run test' will run a Unittest
+2. server
+    `bash start.sh run server` will run a server which listen at ('20174.1.1.1', 101).
+3. client
+    `bash start.sh run client` will run a client which connect to ('20174.1.1.1', 101).
